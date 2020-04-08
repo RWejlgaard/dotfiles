@@ -16,9 +16,9 @@ dotfiles:
   d_oh-my-zsh:
     src: oh-my-zsh
     dst: ~/.oh-my-zsh
-  d_emacs.d:
-    src: emacs.d
-    dst: ~/.emacs.d
+    #  d_emacs.d:
+    #src: emacs.d
+    #dst: ~/.emacs.d
   d_doom.d:
     src: doom.d
     dst: ~/.doom.d
@@ -31,6 +31,10 @@ profiles:
     - f_vimrc
     - f_zshrc
     - d_oh-my-zsh
-    - d_emacs.d
-    - d_doom.d
+    - f_config.fish
+  work:
+    dotfiles:
+    - f_vimrc
+    - f_zshrc
+    - d_oh-my-zsh
     - f_config.fish
