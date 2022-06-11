@@ -9,12 +9,17 @@ Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'mhinz/vim-janah'
 Plug 'marciomazza/vim-brogrammer-theme'
 Plug 'nathanaelkane/vim-indent-guides'
+Plug 'google/vim-jsonnet'
+Plug 'easymotion/vim-easymotion'
+
+Plug 'jreybert/vimagit'
 
 "Plug 'neovim/nvim-lspconfig'
 Plug 'hkupty/iron.nvim', { 'branch': 'direct-invoke' }
 
 Plug 'arcticicestudio/nord-vim'
 Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'morhetz/gruvbox'
 
 " DevOps
 Plug 'andrewstuart/vim-kubernetes'
@@ -61,7 +66,10 @@ Plug 'tpope/vim-pathogen'
 "Plug 'davidhalter/jedi-vim'
 Plug 'blueshirts/darcula'
 Plug 'dag/vim-fish'
-Plug 'junegunn/fzf'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'wookayin/fzf-ripgrep.vim'
+Plug 'yuki-yano/fzf-preview.vim'
 Plug 'dkprice/vim-easygrep'
 Plug 'vim-syntastic/syntastic'
 Plug 'neovim/neovim'

@@ -20,7 +20,8 @@ autocmd FileType python setlocal completeopt-=preview
 syntax enable
 set nonumber
 set nu
-set ts=2
+set ts=4
+set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab " bind tab to use spaces, sue me
 set backspace=2
 set laststatus=2
 set showbreak=\\ "
@@ -58,7 +59,8 @@ let g:terraform_align = 0
 
 nnoremap nt :NERDTreeToggle<CR>
 nnoremap qqq :qall<CR>
-nnoremap <C-f> :FZF<CR>
+nnoremap <C-f> :Files<CR>
+nnoremap <C-_> :Rg<CR>
 
 nnoremap <leader>v :vsplit<CR>
 nnoremap <leader>h :split<CR>
@@ -83,6 +85,8 @@ inoremap <M-Down> <Esc>:m .+1<CR>==gi
 inoremap <silent><expr><C-@> coc#refresh()
 inoremap <silent><expr> <c-space> coc#refresh()
 
+nnoremap <leader>b :Buffers<CR>
+
 nnoremap <M-h> :wincmd h<CR>
 nnoremap <M-j> :wincmd j<CR>
 nnoremap <M-k> :wincmd k<CR>
@@ -90,6 +94,25 @@ nnoremap <M-l> :wincmd l<CR>
 
 nnoremap <M-t> :tabnew<CR>
 nnoremap <M-q> :tabclose<CR>
+
+source $HOME/.config/nvim/plug.vim
+
+let g:EasyMotion_do_mapping = 0 " Disable default mappings
+
+" Jump to anywhere you want with minimal keystrokes, with just one key binding.
+" `s{char}{label}`
+nmap \\ <Plug>(easymotion-overwin-f)
+" or
+" `s{char}{char}{label}`
+""" Need one more keystroke, but on average, it may be more comfortable.
+
+
+" Turn on case-insensitive feature
+let g:EasyMotion_smartcase = 1
+
+" JK motions: Line motions
+map <Leader>j <Plug>(easymotion-j)
+map <Leader>k <Plug>(easymotion-k)
 
 " (Optional)Remove Info(Preview) window
 set completeopt-=preview
@@ -101,5 +124,5 @@ autocmd InsertLeave * if pumvisible() == 0|pclose|endif
 "autocmd TextChanged,TextChangedI <buffer> silent write
 "autocmd TextChanged,TextChangedI <buffer> silent write
 
-colorscheme dracula
+colorscheme gruvbox
 
