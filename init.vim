@@ -2,24 +2,38 @@ set nocompatible
 set shell=bash
 filetype off
 
+" check if running in vim
 if has('nvim')
     let s:editor_root=expand("~/.nvim")
 else
     let s:editor_root=expand("~/.vim")
 endif
 
+" set python path
 let g:python_host_prog="/usr/local/bin/python3"
 
+" COLORS!
 set termguicolors
 
-"LOAD PLUGS
+" load plugins from seperate file since there's a lot of them
 source $HOME/.config/nvim/plug.vim
 
+" remove vim-jedi nag pane
 autocmd FileType python setlocal completeopt-=preview
+set completeopt-=preview
 
+" hide info (preview) window after completions
+autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+
+" enable highlighting
 syntax enable
+
+" enable line numbers
 set nonumber
 set nu
+
+" setup formatting
 set ts=4
 set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab " bind tab to use spaces, sue me
 set backspace=2
@@ -27,8 +41,14 @@ set laststatus=2
 set showbreak=\\ "
 set listchars=tab:→\ ,eol:↲,nbsp:␣,trail:•,extends:⟩,precedes:⟨
 set encoding=utf-8
+
+" enable mouse input
 set mouse+=a
+
+" set clipboard to be shared with OS
 set clipboard=unnamed
+
+" add line at 101 chars line length
 set colorcolumn=101
 
 " Syntastic
@@ -45,67 +65,63 @@ let g:syntastic_check_on_wq = 0
 let g:syntastic_auto_jump = 0
 let g:Powerline_symbols = 'fancy'
 
+" enable cool bar to see where you are in a file
+let g:airline#extensions#scrollbar#enabled = 1
+
 " Syntastic Config
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
-" (Optional) Enable terraform plan to be include in filter
+" terraform settings
 let g:syntastic_terraform_tffilter_plan = 1
 let g:terraform_completion_keys = 1
 let g:terraform_registry_module_completion = 1
 let g:terraform_fmt_on_save = 1
 let g:terraform_align = 0
 
-nnoremap nt :NERDTreeToggle<CR>
-nnoremap qqq :qall<CR>
-nnoremap <C-f> :Files<CR>
-nnoremap <C-_> :Rg<CR>
+"" Keybindings
 
+" file browser
+nnoremap nt :NERDTreeToggle<CR>
+" panic quit
+nnoremap qqq :qall<CR>
+" fuzzy find
+nnoremap <C-f> :Files<CR>
+" fuzzy ripgrep all files in directory
+nnoremap <leader>/ :Rg<CR>
+
+" splits
 nnoremap <leader>v :vsplit<CR>
 nnoremap <leader>h :split<CR>
+
+" syntastic
 nnoremap <leader>sc :SyntasticCheck<CR>
 
+" resize panes
 nnoremap <C-Down> :resize -1<CR>
 nnoremap <C-Up> :resize +1<CR>
 nnoremap <C-Right> :vertical resize +1<CR>
 nnoremap <C-Left> :vertical resize -1<CR>
-
 nnoremap <C-j> :resize -1<CR>
 nnoremap <C-k> :resize +1<CR>
 nnoremap <C-l> :vertical resize +1<CR>
 nnoremap <C-h> :vertical resize -1<CR>
 
-nnoremap <M-Up> :m .-2<CR>==
-nnoremap <M-Down> :m .+1<CR>==
-inoremap <M-Up> <Esc>:m .-2<CR>==gi
-inoremap <M-Down> <Esc>:m .+1<CR>==gi
-
-"inoremap <C-Space> coc#refresh()
+" hacky fix for CTRL-SPC autocompletion
 inoremap <silent><expr><C-@> coc#refresh()
 inoremap <silent><expr> <c-space> coc#refresh()
 
+" fuzzy find active buffers
 nnoremap <leader>b :Buffers<CR>
 
-nnoremap <M-h> :wincmd h<CR>
-nnoremap <M-j> :wincmd j<CR>
-nnoremap <M-k> :wincmd k<CR>
-nnoremap <M-l> :wincmd l<CR>
-
+" tab management
 nnoremap <M-t> :tabnew<CR>
 nnoremap <M-q> :tabclose<CR>
 
-source $HOME/.config/nvim/plug.vim
-
+" easymotion - bind \\ to jump to a specific character
 let g:EasyMotion_do_mapping = 0 " Disable default mappings
-
-" Jump to anywhere you want with minimal keystrokes, with just one key binding.
-" `s{char}{label}`
 nmap \\ <Plug>(easymotion-overwin-f)
-" or
-" `s{char}{char}{label}`
-""" Need one more keystroke, but on average, it may be more comfortable.
-
 
 " Turn on case-insensitive feature
 let g:EasyMotion_smartcase = 1
@@ -114,15 +130,9 @@ let g:EasyMotion_smartcase = 1
 map <Leader>j <Plug>(easymotion-j)
 map <Leader>k <Plug>(easymotion-k)
 
-" (Optional)Remove Info(Preview) window
-set completeopt-=preview
+" copilot all the things
+let g:copilot_filetypes = {'*': v:true}
 
-" (Optional)Hide Info(Preview) window after completions
-autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
-autocmd InsertLeave * if pumvisible() == 0|pclose|endif
-
-"autocmd TextChanged,TextChangedI <buffer> silent write
-"autocmd TextChanged,TextChangedI <buffer> silent write
-
+" I ❤️ gruvbox
 colorscheme gruvbox
 
