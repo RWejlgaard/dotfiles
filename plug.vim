@@ -11,6 +11,7 @@ Plug 'marciomazza/vim-brogrammer-theme'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'google/vim-jsonnet'
 Plug 'easymotion/vim-easymotion'
+Plug 'jnurmine/Zenburn'
 
 Plug 'jreybert/vimagit'
 
@@ -77,6 +78,9 @@ Plug 'neovim/neovim'
 Plug 'nvim-lua/completion-nvim'
 
 Plug 'dracula/vim', {'name': 'dracula'}
+
+Plug 'folke/zen-mode.nvim'
+
 call plug#end()
 
 

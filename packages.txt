@@ -1,0 +1,8 @@
+neovim
+fish
+neomutt
+tmux
+prettyping
+bat
+btop
+fzf
