@@ -8,7 +8,7 @@ cp tmux.conf ~/.tmux.conf
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 # install tmux packages
-./.tmux/plugins/tpm/bin/install_plugins
+#./.tmux/plugins/tpm/bin/install_plugins
 
 # vim config
 mkdir -p ~/.config/nvim
@@ -20,7 +20,3 @@ cp config.fish ~/.config/fish/
 
 # install fish plugins
 fish -c 'omf install bobthefish bang-bang fzf'
-
-# neomutt config
-mkdir -p ~/.config/neomutt
-cp neomuttrc ~/.config/neomutt/
