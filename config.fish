@@ -2,9 +2,15 @@ export fish_greeting=""
 
 export EDITOR=nvim
 
+if [ $TERM = "linux" ] # Asahi Linux TTY fixes
+    setfont /usr/share/consolefonts/Lat2-Terminus32x16.psf.gz   # Make font bigger, it's unreadable by default
+    export TERM=xterm-256color                                  # Pretty colors in TTY
+    sudo dumpkeys | sed s/Caps_Lock/Escape/ | sudo loadkeys     # Rebind Caps Lock to escape
+end
+
 # aliases
-alias get="brew install"
-alias search="brew search"
+alias get="sudo dnf install -y"
+alias search="dnf search"
 alias vim=nvim
 alias cat=bat
 alias ping="prettyping --nolegend"
