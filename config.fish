@@ -21,6 +21,9 @@ else if [ -f /etc/lsb-release ]
 else if [ -f /etc/alpine-release ]
     alias get="apk add"
     alias search="apk search"
+else if [ uname = "FreeBSD" ]
+    alias get="sudo pkg install -y"
+    alias search="pkg search"
 end
 
 alias vim=nvim
