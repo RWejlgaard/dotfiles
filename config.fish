@@ -9,13 +9,23 @@ if [ $TERM = "linux" ] # Asahi Linux TTY fixes
 end
 
 # aliases
-alias get="sudo dnf install -y"
-alias search="dnf search"
+if [ uname = "Darwin" ]
+    alias get="brew install"
+    alias search="brew search"
+else if [ -f /etc/arch-release ]
+    alias get="sudo pacman -S"
+    alias search="pacman -Ss"
+else if [ -f /etc/lsb-release ]
+    alias get="sudo apt install"
+    alias search="apt search"
+else if [ -f /etc/alpine-release ]
+    alias get="apk add"
+    alias search="apk search"
+end
+
 alias vim=nvim
 alias cat=bat
 alias ping="prettyping --nolegend"
-alias edit=nvim # DOS-style alias for nvim
-alias dir=ls    # DOS-style alias for ls
 
 alias k="kubectl"
 alias kp="kubectl get pods -A"

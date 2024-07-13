@@ -6,12 +6,14 @@ if fn.empty(fn.glob(install_path)) > 0 then
         install_path })
 end
 
+vim.api.nvim_set_keymap('n', '<leader>\\', '<Plug>(easymotion-s)', { noremap = true, silent = true})
+
 -- plugins
 local use = require('packer').use
 require('packer').startup(function()
     use { 'Xuyuanp/nerdtree-git-plugin' }
     use { 'airblade/vim-gitgutter' }
-    use { 'airblade/vim-rooter' }
+    --use { 'airblade/vim-rooter' }
     use { 'antoinemadec/FixCursorHold.nvim' }
     use { 'easymotion/vim-easymotion' }
     use { 'hashivim/vim-terraform' }
@@ -30,8 +32,19 @@ require('packer').startup(function()
     use { 'yuki-yano/fzf-preview.vim' }
     use { 'wbthomason/packer.nvim' }
     use { 'godlygeek/tabular' }
-    use { 'nvim-lua/lsp-status.nvim' }
+    use { 'fatih/vim-go' }
     use { 'folke/tokyonight.nvim' }
+    use { 'Yazeed1s/oh-lucy.nvim' }
+    use { "ellisonleao/glow.nvim" }
+    use { "nvim-lua/lsp-status.nvim" }
+    use { 'nvim-lua/plenary.nvim' }
+    use { 'MunifTanjim/nui.nvim' }
+    use { 'dpayne/CodeGPT.nvim' }
+    use { 'towolf/vim-helm' }
+    use {
+        "iamcco/markdown-preview.nvim",
+        requires = { "zhaozg/vim-diagram", "aklt/plantuml-syntax" },
+    }
     use {
         "folke/zen-mode.nvim",
         config = function()
@@ -68,7 +81,12 @@ require('packer').startup(function()
         config = function()
             vim.o.hidden = true
             require('nvim-terminal').setup()
-        end,
+        end
+    }
+    use {
+        "williamboman/mason.nvim",
+        "williamboman/mason-lspconfig.nvim",
+        "neovim/nvim-lspconfig",
     }
     use {
         'VonHeikemen/lsp-zero.nvim',
@@ -94,7 +112,8 @@ end)
 
 -- settings
 vim.opt.termguicolors = true
-vim.api.nvim_set_option('guifont', 'SauceCodePro NF:h12')
+vim.api.nvim_set_option('guifont', 'FiraCode Nerd Font:h12')
+--vim.api.nvim_set_option('NERDTreeChDirMode', 2)
 vim.api.nvim_set_option('number', true)
 vim.api.nvim_set_option('smarttab', true)
 vim.api.nvim_set_option('tabstop', 8)
@@ -109,7 +128,7 @@ vim.api.nvim_set_option('mouse', 'a')
 vim.api.nvim_set_option('clipboard', 'unnamed')
 vim.api.nvim_set_option('scrolloff', 17)
 vim.opt.number = true
-vim.opt.colorcolumn = '101'
+--vim.opt.colorcolumn = '101'
 
 vim.g.terraform_fmt_on_save = true
 vim.g.diagnostics_active = true
@@ -119,18 +138,23 @@ vim.diagnostic.config {
     underline = true,
 }
 
+
 -- keybindings
 local opts = { noremap = true, silent = true }
 vim.api.nvim_set_keymap('n', 'nt', ':NvimTreeToggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'qqq', ':qall<CR>', opts)
 vim.api.nvim_set_keymap('n', '<C-f>', ':Files<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>\\', '<Plug>(easymotion-s)', opts)
+
+
+
 vim.api.nvim_set_keymap('n', '<leader>v', ':vsplit<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>h', ':split<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>b', ':Buffers<CR>', opts)
-vim.api.nvim_set_keymap('i', '<C-Space>', '<C-e>', opts)
-vim.api.nvim_set_keymap('n', '<C-]>', ':BufferLineCycleNext<CR>', opts)
-vim.api.nvim_set_keymap('n', '<C-[>', ':BufferLineCyclePrev<CR>', opts)
+--vim.api.nvim_set_keymap('i', '<C-Space>', '<C-e>', opts)
+--vim.api.nvim_set_keymap('n', '<C-]>', ':BufferLineCycleNext<CR>', opts)
+--vim.api.nvim_set_keymap('n', '<C-[>', ':BufferLineCyclePrev<CR>', opts)
 vim.api.nvim_set_keymap('t', '<leader><ESC>', '<C-\\><C-n>', opts)
 vim.api.nvim_set_keymap('n', '<leader>d', ':TroubleToggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'd', '"_d', opts)
@@ -140,26 +164,66 @@ vim.api.nvim_set_keymap('v', 'c', '"_c', opts)
 
 require("nvim-tree").setup()
 
+require("nvim-lsp-installer").setup {}
 -- Language Server
-local lsp = require('lsp-zero')
-lsp.preset('recommended')
+local lsp_zero = require('lsp-zero')
 local cmp = require('cmp')
-local cmp_mappings = lsp.defaults.cmp_mappings()
 
-cmp_mappings['<C-Space>'] = cmp.mapping(function(fallback)
-    if cmp.visible() then
-        cmp.close()
-        fallback()
-    else
-        cmp.complete()
-    end
-end),
+lsp_zero.on_attach(function(client, bufnr)
+  lsp_zero.default_keymaps({buffer = bufnr})
+end)
 
-    lsp.setup_nvim_cmp({
-        mapping = cmp_mappings
+require('mason').setup({})
+require('mason-lspconfig').setup({
+  ensure_installed = {
+    'bashls',
+    'dockerls',
+    'gopls',
+    'jsonls',
+    'pyright'
+},
+  handlers = {
+    lsp_zero.default_setup,
+    lua_ls = function()
+      local lua_opts = lsp_zero.nvim_lua_ls()
+      require('lspconfig').lua_ls.setup(lua_opts)
+    end,
+  }
+})
+
+cmp.setup({
+    snippet = {
+      -- REQUIRED - you must specify a snippet engine
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+        -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+        -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+      end,
+    },
+    window = {
+      -- completion = cmp.config.window.bordered(),
+      -- documentation = cmp.config.window.bordered(),
+    },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    }),
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'nvim_lua' },
+      { name = 'path' }, -- For vsnip users.
+      -- { name = 'luasnip' }, -- For luasnip users.
+      -- { name = 'ultisnips' }, -- For ultisnips users.
+      -- { name = 'snippy' }, -- For snippy users.
+    }, {
+      { name = 'buffer' },
     })
-
-lsp.setup()
+  })
 
 -- enable diagnostics for showing in-line
 vim.g.diagnostics_active = true
@@ -170,3 +234,4 @@ vim.diagnostic.config {
 }
 
 vim.cmd('colorscheme gruvbox')
+vim.api.nvim_set_keymap('n', '<leader>\\', '<Plug>(easymotion-s)', opts)
