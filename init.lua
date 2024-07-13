@@ -122,14 +122,12 @@ vim.api.nvim_set_option('expandtab', true)
 vim.api.nvim_set_option('shiftwidth', 4)
 vim.api.nvim_set_option('backspace', '2')
 vim.api.nvim_set_option('laststatus', 2)
-vim.cmd('set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab')
-
 vim.api.nvim_set_option('mouse', 'a')
 vim.api.nvim_set_option('clipboard', 'unnamed')
 vim.api.nvim_set_option('scrolloff', 17)
+vim.cmd('set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab')
 vim.opt.number = true
---vim.opt.colorcolumn = '101'
-
+vim.opt.colorcolumn = '80'
 vim.g.terraform_fmt_on_save = true
 vim.g.diagnostics_active = true
 vim.diagnostic.config {

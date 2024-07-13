@@ -6,4 +6,6 @@ if ! grep -q "$(which fish)" /etc/shells; then
 fi
 
 # change shell to fish
-chsh -s $(which fish)
+if ! [ "$(basename $SHELL)" == "fish" ]; then
+    chsh -s $(which fish)
+fi
