@@ -15,8 +15,9 @@ PACKAGES=(
 
 # if MacOS install Homebrew
 if [ "$(uname)" == "Darwin" ]; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
+    if [ ! -x "$(which brew)" ]; then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
     # install packages
     brew install "${PACKAGES[@]}"
 fi
