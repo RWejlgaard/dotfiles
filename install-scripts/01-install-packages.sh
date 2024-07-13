@@ -9,7 +9,6 @@ PACKAGES=(
   "curl"
   "bat"
   "go"
-  "prettyping"
   "npm"
 )
 
@@ -49,18 +48,12 @@ fi
 
 # if Alpine install
 if [ -f /etc/alpine-release ]; then
-    # remove "prettyping" from packages
-    PACKAGES=("${PACKAGES[@]/prettyping}")
-
     # install packages
     sudo apk add "${PACKAGES[@]}"
 fi
 
 # if freebsd install
 if [ "$(uname)" == "FreeBSD" ]; then
-    # remove "prettyping" from packages
-    PACKAGES=("${PACKAGES[@]/prettyping}")
-
     # install packages
     sudo pkg install -y "${PACKAGES[@]}"
 fi

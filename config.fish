@@ -28,7 +28,6 @@ end
 
 alias vim=nvim
 alias cat=bat
-alias ping="prettyping --nolegend"
 
 alias k="kubectl"
 alias kp="kubectl get pods -A"
