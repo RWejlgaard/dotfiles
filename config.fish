@@ -49,5 +49,5 @@ function gitissue
   git checkout $argv[1]
 end
 
-# misc paths to add disabled by default since they vary by OS
-set -g fish_user_paths "/usr/local/opt/node@16/bin:$PATH" $fish_user_paths
+# misc paths to add to $PATH
+set -g fish_user_paths "$HOME/bin:$PATH" $fish_user_paths

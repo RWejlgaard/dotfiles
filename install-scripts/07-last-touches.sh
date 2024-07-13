@@ -9,3 +9,6 @@ fi
 if ! [ "$(basename $SHELL)" == "fish" ]; then
     chsh -s $(which fish)
 fi
+
+# create local bin directory
+mkdir -p ~/bin
