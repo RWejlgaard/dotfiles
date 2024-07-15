@@ -5,6 +5,6 @@ install:
 	@fish ./install-scripts/04-fish-plugins.fish
 	@fish ./install-scripts/05-tmux-plugins.fish
 	@fish ./install-scripts/06-vim-setup.fish
-	@bash ./install-scripts/07-change-shell.sh
+	@bash ./install-scripts/07-last-touches.sh
 
 .PHONY: install

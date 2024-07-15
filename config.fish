@@ -48,6 +48,3 @@ function gitissue
   git branch $argv[1]
   git checkout $argv[1]
 end
-
-# misc paths to add to $PATH
-set -g fish_user_paths "$HOME/bin:$PATH" $fish_user_paths

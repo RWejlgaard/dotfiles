@@ -10,6 +10,7 @@ PACKAGES=(
   "bat"
   "go"
   "npm"
+  "ripgrep"
 )
 
 # if MacOS install Homebrew
