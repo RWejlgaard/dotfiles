@@ -25,6 +25,7 @@ require('packer').startup(function()
         run = 'fzf#install()'
     }
     use {'junegunn/fzf.vim'}
+    use { 'EdenEast/nightfox.nvim' }
     use {'morhetz/gruvbox'}
     use {'nvim-treesitter/nvim-treesitter'}
     use {'scrooloose/nerdcommenter'}
@@ -144,11 +145,8 @@ vim.api.nvim_set_keymap('n', '<leader>\\', '<Plug>(easymotion-s)', opts)
 vim.api.nvim_set_keymap('n', '<leader>v', ':vsplit<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>h', ':split<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>b', ':Buffers<CR>', opts)
--- vim.api.nvim_set_keymap('i', '<C-Space>', '<C-e>', opts)
--- vim.api.nvim_set_keymap('n', '<C-]>', ':BufferLineCycleNext<CR>', opts)
--- vim.api.nvim_set_keymap('n', '<C-[>', ':BufferLineCyclePrev<CR>', opts)
 vim.api.nvim_set_keymap('t', '<leader><ESC>', '<C-\\><C-n>', opts)
-vim.api.nvim_set_keymap('n', '<leader>d', ':TroubleToggle<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>d', ':Trouble diagnostics toggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('v', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('n', 'c', '"_c', opts)
@@ -200,7 +198,15 @@ end)
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-    ensure_installed = {'bashls', 'dockerls', 'gopls', 'jsonls', 'pyright'},
+    ensure_installed = {
+        'bashls',
+        'dockerls',
+        'gopls',
+        'jsonls',
+        'yamlls',
+        'pyright',
+        'terraformls'
+    },
     handlers = {
         lsp_zero.default_setup,
         lua_ls = function()
@@ -286,5 +292,5 @@ vim.diagnostic.config {
     underline = true
 }
 
-vim.cmd('colorscheme gruvbox')
+vim.cmd('colorscheme carbonfox')
 vim.api.nvim_set_keymap('n', '<leader>\\', '<Plug>(easymotion-s)', opts)
