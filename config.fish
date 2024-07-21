@@ -34,6 +34,12 @@ alias kp="kubectl get pods -A"
 alias gswitch="gcloud config configurations activate"
 alias kc="kubectx"
 
+# Replicate the behavior of `!!` in bash
+function last_history_item
+    echo $history[1]
+end
+abbr -a !! --position anywhere --function last_history_item
+
 # lookup various commands/syntax in a pinch
 function cheat --description "help <field> <topic>"
 	set args (echo $argv[2..-1] | tr ' ' '+')
