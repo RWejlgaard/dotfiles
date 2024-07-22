@@ -1,4 +1,4 @@
--- Bootstrap packer
+-- Bootstrap packer, if it's not installed (first run)
 local fn = vim.fn
 local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 if fn.empty(fn.glob(install_path)) > 0 then
@@ -10,7 +10,6 @@ end
 local use = require('packer').use
 require('packer').startup(function()
     use { 'airblade/vim-gitgutter' }            -- show git changes in the gutter
-    use { 'easymotion/vim-easymotion' }         -- easy motion with "\\"
     use { 'hashivim/vim-terraform' }            -- terraform syntax highlighting
     use {
         'junegunn/fzf',
@@ -22,33 +21,28 @@ require('packer').startup(function()
     use { 'scrooloose/nerdcommenter' }          -- easy commenting
     use { 'tpope/vim-fugitive' }                -- git integration with :G{git cmd}
     use { 'itchyny/lightline.vim' }             -- statusline
-    use { 'wookayin/fzf-ripgrep.vim' }
-    use { 'yuki-yano/fzf-preview.vim' }
-    use { 'wbthomason/packer.nvim' }
+    use { 'wookayin/fzf-ripgrep.vim' }          -- fzf ripgrep integration, for "<leader>/"
+    use { 'yuki-yano/fzf-preview.vim' }         -- fzf preview
+    use { 'wbthomason/packer.nvim' }            -- package manager
     use { 'fatih/vim-go' }                      -- go syntax highlighting
-    use { "ellisonleao/glow.nvim" }
-    use { 'dpayne/CodeGPT.nvim' }
-    use { 'onsails/lspkind.nvim' }
-    use { 'zbirenbaum/copilot.lua' }
-    use {
+    use { "ellisonleao/glow.nvim" }             -- markdown preview using :Glow
+    use { 'rhysd/git-messenger.vim' }           -- Show git messages under cursor
+    use { 'onsails/lspkind.nvim' }              -- lsp kind, makes autocomplete look better
+    use { 'zbirenbaum/copilot.lua' }            -- copilot
+    use {                                       -- copilot addon for cmp
         "zbirenbaum/copilot-cmp",
         after = { "copilot.lua" },
         config = function()
             require("copilot_cmp").setup()
         end
     }
-    use { 'zbirenbaum/copilot.lua' }
-    use { 'nvim-lua/plenary.nvim' }
-    use { 'CopilotC-Nvim/CopilotChat.nvim' }
-    use {
-        "iamcco/markdown-preview.nvim",
-        requires = { "zhaozg/vim-diagram", "aklt/plantuml-syntax" }
-    }
-    use {
+    use { 'nvim-lua/plenary.nvim' }             -- lua utility functions
+    use { 'CopilotC-Nvim/CopilotChat.nvim' }    -- copilot chat
+    use {                                       -- adds file bars along the top similar to vscode
         'romgrk/barbar.nvim',
         requires = { 'kyazdani42/nvim-web-devicons' }
     }
-    use {
+    use {                                       -- adds a file explorer similar to vscode
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
         requires = {
@@ -57,22 +51,26 @@ require('packer').startup(function()
             "MunifTanjim/nui.nvim",
         }
     }
-    use {
+    use {                                       -- adds diagnostics for files
         "folke/trouble.nvim",
         requires = "kyazdani42/nvim-web-devicons",
         config = function()
             require("trouble").setup {}
         end
     }
-    use {
+    use {                                       -- better terminal
         's1n7ax/nvim-terminal',
         config = function()
             vim.o.hidden = true
             require('nvim-terminal').setup()
         end
     }
-    use { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim", "neovim/nvim-lspconfig" }
-    use {
+    use {                                       -- mason, easy download and install of LSPs
+        "williamboman/mason.nvim",
+        "williamboman/mason-lspconfig.nvim",
+        "neovim/nvim-lspconfig"
+    }
+    use {                                       -- LSP
         'VonHeikemen/lsp-zero.nvim',
         requires = {                                                    -- LSP Support
             { 'neovim/nvim-lspconfig' }, { 'williamboman/nvim-lsp-installer' }, -- Autocompletion
@@ -110,13 +108,13 @@ vim.api.nvim_set_keymap('n', 'nt', ':Neotree toggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'qqq', ':qall<CR>', opts)
 vim.api.nvim_set_keymap('n', '<C-f>', ':Files<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)
-vim.api.nvim_set_keymap('n', '<leader>\\', '<Plug>(easymotion-s1)', opts)
 
 vim.api.nvim_set_keymap('n', '<leader>v', ':vsplit<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>h', ':split<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>b', ':Buffers<CR>', opts)
 vim.api.nvim_set_keymap('t', '<leader><ESC>', '<C-\\><C-n>', opts)
 vim.api.nvim_set_keymap('n', '<leader>d', ':Trouble diagnostics toggle<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>g', ':GitMessenger<CR>', opts)
 vim.api.nvim_set_keymap('n', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('v', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('n', 'c', '"_c', opts)
@@ -199,7 +197,7 @@ lspkind.init({
         Copilot = ""
     }
 })
-vim.api.nvim_set_hl(0, "CmpItemKindCopilot", {
+vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { -- 
     fg = "#6CC644"
 })
 
@@ -207,7 +205,7 @@ cmp.setup({
     formatting = {
         format = lspkind.cmp_format({
             mode = 'symbol', -- show only symbol annotations
-            maxwidth = 50,   -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+            maxwidth = 70,   -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
             -- can also be a function to dynamically calculate max width such as
             -- maxwidth = function() return math.floor(0.45 * vim.o.columns) end,
             ellipsis_char = '...',    -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
@@ -270,4 +268,3 @@ vim.diagnostic.config {
 }
 
 vim.cmd('colorscheme carbonfox')
-vim.api.nvim_set_keymap('n', '<leader>\\', '<Plug>(easymotion-s)', opts)
