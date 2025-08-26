@@ -11,6 +11,7 @@ PACKAGES=(
   "go"
   "npm"
   "ripgrep"
+  "exa"
 )
 
 # if MacOS install Homebrew
@@ -25,19 +26,21 @@ fi
 # if Arch install
 if [ -f /etc/arch-release ]; then
     # install yay
-    sudo pacman -S --noconfirm base-devel
-    git clone https://aur.archlinux.org/yay.git
-    cd yay
-    makepkg -si --noconfirm
-    cd ..
-    rm -rf yay
+    if [ -z $(which yay) ]; then
+        sudo pacman -S --noconfirm base-devel
+        git clone https://aur.archlinux.org/yay.git
+        cd yay
+        makepkg -si --noconfirm
+        cd ..
+        rm -rf yay
+    fi
 
     # install packages
     sudo pacman -S --noconfirm "${PACKAGES[@]}"
 fi
 
 # if debian or ubuntu install
-if [ -f /etc/lsb-release ] || [ -f /etc/debian_version ]; then
+if [ -f /etc/debian_version ]; then
     # replace "go" with "golang" for debian
     PACKAGES=("${PACKAGES[@]/go/golang}")
 

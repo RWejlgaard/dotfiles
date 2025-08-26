@@ -180,7 +180,6 @@ require('mason-lspconfig').setup({
         'jsonls',
         'yamlls',
         'pyright',
-        'terraformls'
     },
     handlers = {
         lsp_zero.default_setup,
@@ -267,4 +266,4 @@ vim.diagnostic.config {
     underline = true
 }
 
-vim.cmd('colorscheme carbonfox')
+vim.cmd('colorscheme murphy')

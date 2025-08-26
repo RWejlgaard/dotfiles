@@ -7,15 +7,18 @@ mkdir -p ~/.config/fish
 mkdir -p ~/.config/fish/conf.d
 
 # vim
-cp init.lua ~/.config/nvim/
+cp config/vim/init.lua ~/.config/nvim/
 
 # fish
-cp config.fish ~/.config/fish/
+cp config/fish/config.fish ~/.config/fish/
+cp config/fish/aliases.fish ~/.config/fish/conf.d/
+cp config/fish/functions.fish ~/.config/fish/conf.d/
 
-# if envvars doesn't exist, copy it
+# Only copy envvars.fish if it doesn't exist.
+# This way we can override it with our own configs.
 if [ ! -f ~/.config/fish/conf.d/envvars.fish ]; then
-    cp envvars.fish ~/.config/fish/conf.d/
+    cp config/fish/envvars.fish ~/.config/fish/conf.d/
 fi
 
 # tmux
-cp tmux.conf ~/.tmux.conf
+cp config/tmux/tmux.conf ~/.tmux.conf
