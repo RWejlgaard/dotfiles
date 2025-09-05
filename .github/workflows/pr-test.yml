@@ -1,0 +1,33 @@
+name: PR Test
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+  push:
+    branches:
+      - pr-checks
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        distro:
+          - alpine
+          - archlinux
+          - fedora
+          - ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Only build
+        run: |
+          docker buildx build --platform linux/amd64 --output "type=image,push=false" -f tests/Dockerfile-${{ matrix.distro }} .

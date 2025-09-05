@@ -1,0 +1,10 @@
+FROM fedora:latest
+
+COPY ../. /workspace
+
+WORKDIR /workspace
+
+RUN dnf -y update
+RUN dnf -y install make sudo
+
+RUN make
