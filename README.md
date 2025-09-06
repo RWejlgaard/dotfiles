@@ -155,6 +155,34 @@ All configuration files are designed to be easily customizable:
 - **Plugin installation fails**: Run individual scripts manually to identify issues
 - **Shell not changed**: Log out and back in, or restart your terminal
 
+## CI/CD & Pull Request Checks
+
+This repository includes automated testing via GitHub Actions to ensure the dotfiles installation works correctly across multiple Linux distributions.
+
+### Pull Request Testing
+
+When you submit a pull request, the following automated checks run:
+
+- **Multi-distro Testing**: The installation is tested on:
+  - Alpine Linux
+  - Arch Linux  
+  - Fedora
+  - Ubuntu
+
+- **Docker-based Testing**: Each distribution test runs in a containerized environment using Docker Buildx with QEMU for cross-platform compatibility
+
+- **Build Verification**: The GitHub Action (`pr-test.yml`) verifies that the dotfiles can be successfully built on each supported platform
+
+### Workflow Details
+
+The PR testing workflow:
+1. Triggers on pull requests to `master` or `main` branches
+2. Uses a matrix strategy to test against multiple Linux distributions
+3. Sets up QEMU and Docker Buildx for multi-platform testing
+4. Builds the dotfiles installation in each distribution's container
+
+This ensures that changes don't break compatibility with any supported operating system before they're merged.
+
 ## Contributing
 
 Please don't contribute.
