@@ -1,0 +1,9 @@
+FROM alpine:latest
+
+COPY . /workspace
+
+WORKDIR /workspace
+
+RUN apk add make shadow bash sudo
+
+RUN make

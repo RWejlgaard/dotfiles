@@ -9,9 +9,7 @@ PACKAGES=(
   "curl"
   "bat"
   "go"
-  "npm"
   "ripgrep"
-  "exa"
 )
 
 # if MacOS install Homebrew
@@ -26,7 +24,7 @@ fi
 # if Arch install
 if [ -f /etc/arch-release ]; then
     # install yay
-    if [ -z $(which yay) ]; then
+    if [ -z "$(which yay)" ] && [ "$EUID" -ne 0 ]; then
         sudo pacman -S --noconfirm base-devel
         git clone https://aur.archlinux.org/yay.git
         cd yay
@@ -60,4 +58,10 @@ fi
 if [ "$(uname)" == "FreeBSD" ]; then
     # install packages
     sudo pkg install -y "${PACKAGES[@]}"
+fi
+
+# if RHEL/CentOS/Fedora install
+if [ -f /etc/redhat-release ]; then
+    # install packages
+    sudo dnf install -y "${PACKAGES[@]}"
 fi

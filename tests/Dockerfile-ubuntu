@@ -1,0 +1,9 @@
+FROM ubuntu:latest
+
+COPY ../. /workspace
+
+WORKDIR /workspace
+
+RUN apt install --update -y make sudo
+
+RUN make

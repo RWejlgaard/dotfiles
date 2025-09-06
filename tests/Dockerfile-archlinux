@@ -1,0 +1,10 @@
+FROM archlinux:latest
+
+COPY ../. /workspace
+
+WORKDIR /workspace
+
+RUN pacman -Syy
+RUN pacman -S --noconfirm make sudo git which
+
+RUN make
