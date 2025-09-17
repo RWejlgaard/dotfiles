@@ -1,9 +1,4 @@
 #!/usr/bin/env fish
 
-echo "Setting up neovim. This may take a while..."
+# With Lazy we don't need any setup, leaving this file here for the future
 
-# wait for packer to install, output is messy so let's hide it
-nvim --headless -c 'sleep 1000m' -c 'qall' > /dev/null 2>&1
-
-# run PackerSync, output is messy so let's hide it
-nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync' > /dev/null 2>&1
