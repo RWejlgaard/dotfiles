@@ -6,79 +6,91 @@ if fn.empty(fn.glob(install_path)) > 0 then
         install_path })
 end
 
--- plugins
-local use = require('packer').use
-require('packer').startup(function()
-    use { 'airblade/vim-gitgutter' }            -- show git changes in the gutter
-    use { 'hashivim/vim-terraform' }            -- terraform syntax highlighting
-    use {
+local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+  local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
+  if vim.v.shell_error ~= 0 then
+    error('Error cloning lazy.nvim:\n' .. out)
+  end
+end
+
+---@type vim.Option
+local rtp = vim.opt.rtp
+rtp:prepend(lazypath)
+
+require('lazy').setup({
+    { 'airblade/vim-gitgutter' },            -- show git changes in the gutter
+    { 'hashivim/vim-terraform' },            -- terraform syntax highlighting
+    {
         'junegunn/fzf',
         run = 'fzf#install()'
-    }
-    use {'junegunn/fzf.vim'}
-    use { 'EdenEast/nightfox.nvim' }            -- nightfox theme
-    use { 'nvim-treesitter/nvim-treesitter' }   -- treesitter, makes syntax highlighting better
-    use { 'scrooloose/nerdcommenter' }          -- easy commenting
-    use { 'tpope/vim-fugitive' }                -- git integration with :G{git cmd}
-    use { 'itchyny/lightline.vim' }             -- statusline
-    use { 'wookayin/fzf-ripgrep.vim' }          -- fzf ripgrep integration, for "<leader>/"
-    use { 'yuki-yano/fzf-preview.vim' }         -- fzf preview
-    use { 'wbthomason/packer.nvim' }            -- package manager
-    use { 'fatih/vim-go' }                      -- go syntax highlighting
-    use { "ellisonleao/glow.nvim" }             -- markdown preview using :Glow
-    use { 'rhysd/git-messenger.vim' }           -- Show git messages under cursor
-    use { 'onsails/lspkind.nvim' }              -- lsp kind, makes autocomplete look better
-    use { 'zbirenbaum/copilot.lua' }            -- copilot
-    use {                                       -- copilot addon for cmp
+    },
+    {'junegunn/fzf.vim'},
+    { 'EdenEast/nightfox.nvim' },            -- nightfox theme
+    { 'nvim-treesitter/nvim-treesitter' },   -- treesitter, makes syntax highlighting better
+    { 'scrooloose/nerdcommenter' },          -- easy commenting
+    { 'tpope/vim-fugitive' },                -- git integration with :G{git cmd}
+    { 'itchyny/lightline.vim' },             -- statusline
+    { 'wookayin/fzf-ripgrep.vim' },          -- fzf ripgrep integration, for "<leader>/"
+    { 'yuki-yano/fzf-preview.vim' },         -- fzf preview
+    { 'wbthomason/packer.nvim' },            -- package manager
+    { 'fatih/vim-go' },                      -- go syntax highlighting
+    { "ellisonleao/glow.nvim" },             -- markdown preview using :Glow
+    { 'rhysd/git-messenger.vim' },           -- Show git messages under cursor
+    { 'onsails/lspkind.nvim' },              -- lsp kind, makes autocomplete look better
+    { 'zbirenbaum/copilot.lua' },            -- copilot
+    { 'hrsh7th/vim-vsnip' },
+    {                                       -- copilot addon for cmp
         "zbirenbaum/copilot-cmp",
         after = { "copilot.lua" },
         config = function()
             require("copilot_cmp").setup()
         end
-    }
-    use { 'nvim-lua/plenary.nvim' }             -- lua utility functions
-    use { 'CopilotC-Nvim/CopilotChat.nvim' }    -- copilot chat
-    use {                                       -- adds file bars along the top similar to vscode
+    },
+    { 'nvim-lua/plenary.nvim' },             -- lua utility functions
+    { 'CopilotC-Nvim/CopilotChat.nvim' },    -- copilot chat
+    {                                       -- adds file bars along the top similar to vscode
         'romgrk/barbar.nvim',
-        requires = { 'kyazdani42/nvim-web-devicons' }
-    }
-    use {                                       -- adds a file explorer similar to vscode
+        dependencies = { 'kyazdani42/nvim-web-devicons' }
+    },
+    {                                       -- adds a file explorer similar to vscode
         "nvim-neo-tree/neo-tree.nvim",
         branch = "v3.x",
-        requires = {
+        dependencies = {
             "nvim-lua/plenary.nvim",
             "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
             "MunifTanjim/nui.nvim",
         }
-    }
-    use {                                       -- adds diagnostics for files
+    },
+    {                                       -- adds diagnostics for files
         "folke/trouble.nvim",
-        requires = "kyazdani42/nvim-web-devicons",
+        dependencies = "kyazdani42/nvim-web-devicons",
         config = function()
             require("trouble").setup {}
         end
-    }
-    use {                                       -- better terminal
+    },
+    {                                       -- better terminal
         's1n7ax/nvim-terminal',
         config = function()
             vim.o.hidden = true
             require('nvim-terminal').setup()
         end
-    }
-    use {                                       -- mason, easy download and install of LSPs
+    },
+    {                                       -- mason, easy download and install of LSPs
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
         "neovim/nvim-lspconfig"
-    }
-    use {                                       -- LSP
+    },
+    {                                       -- LSP
         'VonHeikemen/lsp-zero.nvim',
-        requires = {                                                    -- LSP Support
+        dependencies = {                                                    -- LSP Support
             { 'neovim/nvim-lspconfig' }, { 'williamboman/nvim-lsp-installer' }, -- Autocompletion
             { 'hrsh7th/nvim-cmp' }, { 'hrsh7th/cmp-buffer' }, { 'hrsh7th/cmp-path' }, { 'saadparwaiz1/cmp_luasnip' },
             { 'hrsh7th/cmp-nvim-lsp' }, { 'hrsh7th/cmp-nvim-lua' },     -- Snippets
             { 'L3MON4D3/LuaSnip' }, { 'rafamadriz/friendly-snippets' } }
-    }
-end)
+    },
+})
 
 -- settings
 vim.opt.termguicolors = true
