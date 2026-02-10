@@ -65,3 +65,9 @@ if [ -f /etc/redhat-release ]; then
     # install packages
     sudo dnf install -y "${PACKAGES[@]}"
 fi
+
+# if Gentoo
+if [ -f /etc/gentoo-release ]; then
+    PACKAGES=("${PACKAGES[@]/git/dev-vcs\/git}")
+    sudo emerge "${PACKAGES[@]}"
+fi
