@@ -5,6 +5,7 @@ set -e # exit on error
 mkdir -p ~/.config/nvim
 mkdir -p ~/.config/fish
 mkdir -p ~/.config/fish/conf.d
+mkdir -p ~/.config/kitty
 
 # vim
 cp config/vim/init.lua ~/.config/nvim/
@@ -22,3 +23,6 @@ fi
 
 # tmux
 cp config/tmux/tmux.conf ~/.tmux.conf
+
+# kitty
+cp config/kitty/kitty.conf ~/.config/kitty/
