@@ -23,7 +23,16 @@ require('lazy').setup({
     },
     { 'junegunn/fzf.vim' },
     { 'EdenEast/nightfox.nvim' },            -- nightfox theme
-    { 'nvim-treesitter/nvim-treesitter' },   -- treesitter, makes syntax highlighting better
+    {
+        'nvim-treesitter/nvim-treesitter',   -- treesitter, makes syntax highlighting better
+        build = ':TSUpdate',
+        main = 'nvim-treesitter.config',
+        opts = {
+            ensure_installed = { 'make', 'go', 'python', 'bash', 'json', 'yaml', 'lua' },
+            auto_install = true,
+            highlight = { enable = true },
+        },
+    },
     { 'numToStr/Comment.nvim' },             -- easy commenting
     { 'tpope/vim-fugitive' },                -- git integration with :G{git cmd}
     { 'itchyny/lightline.vim' },             -- statusline
@@ -31,6 +40,12 @@ require('lazy').setup({
     { 'yuki-yano/fzf-preview.vim' },         -- fzf preview
     { 'fatih/vim-go' },                      -- go syntax highlighting
     { 'OXY2DEV/markview.nvim' },             -- markdown preview in-buffer
+    { 'folke/flash.nvim', opts = {} },       -- fast motion/jump anywhere on screen
+    { 'windwp/nvim-autopairs', event = 'InsertEnter', opts = {} },
+    {
+        'stevearc/aerial.nvim',              -- symbol outline panel
+        opts = { open_automatic = true },
+    },
     { 'rhysd/git-messenger.vim' },           -- Show git messages under cursor
     {
         'kdheepak/lazygit.nvim',
@@ -117,7 +132,7 @@ local opts = {
     noremap = true,
     silent = true
 }
-vim.api.nvim_set_keymap('n', 'tt', ':NvimTreeToggle<CR>', opts)
+vim.api.nvim_set_keymap('n', 't', ':NvimTreeToggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'qqq', ':qall<CR>', opts)
 vim.api.nvim_set_keymap('n', '<C-f>', ':Telescope find_files<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)
@@ -131,6 +146,9 @@ vim.api.nvim_set_keymap('t', '<leader><ESC>', '<C-\\><C-n>', opts)
 vim.api.nvim_set_keymap('n', '<leader>d', ':Trouble diagnostics toggle<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>g', ':GitMessenger<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>lg', ':LazyGit<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>a', ':AerialToggle<CR>', opts)
+vim.keymap.set({'n', 'x', 'o'}, '<leader>s', function() require('flash').jump() end)
+vim.keymap.set({'n', 'x', 'o'}, '<leader>S', function() require('flash').treesitter() end)
 vim.api.nvim_set_keymap('n', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('v', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('n', 'c', '"_c', opts)
