@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e # exit on error
 
+exclude() {
+    PACKAGES=( $(printf '%s\n' "${PACKAGES[@]}" | grep -vxE "$(IFS='|'; echo "$*")") )
+}
+
+replace() {
+    PACKAGES=("${PACKAGES[@]/$1/$2}")
+}
+
 PACKAGES=(
   "tmux"
   "neovim"
@@ -42,8 +50,8 @@ fi
 # if debian or ubuntu install
 if [ -f /etc/debian_version ]; then
     # replace "go" with "golang" for debian
-    PACKAGES=("${PACKAGES[@]/go/golang}")
-    PACKAGES=("${PACKAGES[@]/lazygit/}") # ubuntu doesn't have lazygit :(
+    replace go golang
+    exclude lazygit
 
     # install packages
     export DEBIAN_FRONTEND=noninteractive
@@ -65,7 +73,7 @@ fi
 
 # if RHEL/CentOS/Fedora install
 if [ -f /etc/redhat-release ]; then
-    PACKAGES=("${PACKAGES[@]/lazygit/}")
+    exclude curl lazygit
 
     # install packages
     sudo dnf install -y "${PACKAGES[@]}"
@@ -73,6 +81,6 @@ fi
 
 # if Gentoo
 if [ -f /etc/gentoo-release ]; then
-    PACKAGES=("${PACKAGES[@]/git/dev-vcs\/git}")
+    replace git dev-vcs/git
     sudo emerge "${PACKAGES[@]}"
 fi
