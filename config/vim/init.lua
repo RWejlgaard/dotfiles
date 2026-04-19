@@ -143,7 +143,10 @@ require('gitsigns').setup()
 require('telescope').setup()
 require('telescope').load_extension('fzf')
 require('ibl').setup()
-require('Comment').setup()
+require('Comment').setup({
+    toggler = { line = '<leader>c<space>' },
+    opleader = { line = '<leader>c<space>' },
+})
 require('todo-comments').setup()
 
 require('conform').setup({

@@ -9,7 +9,9 @@ PACKAGES=(
   "curl"
   "bat"
   "go"
+  "eza"
   "ripgrep"
+  "lazygit"
 )
 
 # if MacOS install Homebrew
