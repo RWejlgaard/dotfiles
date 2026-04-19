@@ -65,6 +65,8 @@ fi
 
 # if RHEL/CentOS/Fedora install
 if [ -f /etc/redhat-release ]; then
+    PACKAGES=("${PACKAGES[@]/lazygit/}")
+
     # install packages
     sudo dnf install -y "${PACKAGES[@]}"
 fi
