@@ -12,7 +12,6 @@ jobs:
       matrix:
         distro:
           - alpine
-          - alma
           - archlinux
           - debian
           - fedora
