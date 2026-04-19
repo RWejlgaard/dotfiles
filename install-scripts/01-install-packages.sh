@@ -43,6 +43,7 @@ fi
 if [ -f /etc/debian_version ]; then
     # replace "go" with "golang" for debian
     PACKAGES=("${PACKAGES[@]/go/golang}")
+    PACKAGES=("${PACKAGES[@]/lazygit/}") # ubuntu doesn't have lazygit :(
 
     # install packages
     export DEBIAN_FRONTEND=noninteractive
