@@ -13,7 +13,10 @@ jobs:
         distro:
           - alpine
           - archlinux
+          - debian
           - fedora
+          - opensuse
+          - rocky
           - ubuntu
     runs-on: ubuntu-latest
     steps:

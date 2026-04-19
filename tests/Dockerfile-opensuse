@@ -1,0 +1,9 @@
+FROM opensuse/leap:latest
+
+COPY ../. /workspace
+
+WORKDIR /workspace
+
+RUN zypper install -y make sudo
+
+RUN make
