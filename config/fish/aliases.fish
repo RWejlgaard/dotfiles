@@ -23,6 +23,8 @@ end
 
 alias vim=nvim
 alias cat="bat -Pp"
+alias lg=lazygit
+alias ls=eza
 
 alias k="kubectl"
 alias kp="kubectl get pods -A"

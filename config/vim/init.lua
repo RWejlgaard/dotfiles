@@ -15,26 +15,44 @@ local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
 require('lazy').setup({
-    { 'airblade/vim-gitgutter' },            -- show git changes in the gutter
+    { 'lewis6991/gitsigns.nvim' },            -- show git changes in the gutter
     { 'hashivim/vim-terraform' },            -- terraform syntax highlighting
     {
         'junegunn/fzf',
         run = 'fzf#install()'
     },
-    {'junegunn/fzf.vim'},
+    { 'junegunn/fzf.vim' },
     { 'EdenEast/nightfox.nvim' },            -- nightfox theme
     { 'nvim-treesitter/nvim-treesitter' },   -- treesitter, makes syntax highlighting better
-    { 'scrooloose/nerdcommenter' },          -- easy commenting
+    { 'numToStr/Comment.nvim' },             -- easy commenting
     { 'tpope/vim-fugitive' },                -- git integration with :G{git cmd}
     { 'itchyny/lightline.vim' },             -- statusline
     { 'wookayin/fzf-ripgrep.vim' },          -- fzf ripgrep integration, for "<leader>/"
     { 'yuki-yano/fzf-preview.vim' },         -- fzf preview
     { 'fatih/vim-go' },                      -- go syntax highlighting
-    { "ellisonleao/glow.nvim" },             -- markdown preview using :Glow
+    { 'OXY2DEV/markview.nvim' },             -- markdown preview in-buffer
     { 'rhysd/git-messenger.vim' },           -- Show git messages under cursor
+    {
+        'kdheepak/lazygit.nvim',
+        dependencies = { 'nvim-lua/plenary.nvim' }
+    },
     { 'onsails/lspkind.nvim' },              -- lsp kind, makes autocomplete look better
     { 'hrsh7th/vim-vsnip' },
     { 'nvim-lua/plenary.nvim' },             -- lua utility functions
+    {
+        'nvim-telescope/telescope.nvim',
+        dependencies = { 'nvim-lua/plenary.nvim' }
+    },
+    {
+        'nvim-telescope/telescope-fzf-native.nvim',
+        build = 'make'
+    },
+    { 'stevearc/conform.nvim' },
+    { 'lukas-reineke/indent-blankline.nvim' },
+    {
+        'folke/todo-comments.nvim',
+        dependencies = { 'nvim-lua/plenary.nvim' }
+    },
     {
         "ccntrq/autoreload.nvim",
         opts = {}, -- make sure setup is called with defaults
@@ -44,13 +62,8 @@ require('lazy').setup({
         dependencies = { 'kyazdani42/nvim-web-devicons' }
     },
     {                                       -- adds a file explorer similar to vscode
-        "nvim-neo-tree/neo-tree.nvim",
-        branch = "v3.x",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-            "MunifTanjim/nui.nvim",
-        }
+        'nvim-tree/nvim-tree.lua',
+        dependencies = { 'nvim-tree/nvim-web-devicons' }
     },
     {                                       -- adds diagnostics for files
         "folke/trouble.nvim",
@@ -96,6 +109,7 @@ vim.opt.mouse = 'a'
 vim.opt.clipboard = 'unnamed'
 vim.opt.scrolloff = 17
 vim.opt.colorcolumn = '80'
+vim.opt.signcolumn = 'yes'
 vim.g.terraform_fmt_on_save = true
 
 -- keybindings
@@ -103,17 +117,20 @@ local opts = {
     noremap = true,
     silent = true
 }
-vim.api.nvim_set_keymap('n', '<leader>t', ':Neotree toggle<CR>', opts)
+vim.api.nvim_set_keymap('n', 'tt', ':NvimTreeToggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'qqq', ':qall<CR>', opts)
-vim.api.nvim_set_keymap('n', '<C-f>', ':Files<CR>', opts)
+vim.api.nvim_set_keymap('n', '<C-f>', ':Telescope find_files<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)
 
 vim.api.nvim_set_keymap('n', '<leader>v', ':vsplit<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>h', ':split<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>b', ':Buffers<CR>', opts)
+vim.api.nvim_set_keymap('n', '<C-[>', ':bprev<CR>', opts)
+vim.api.nvim_set_keymap('n', '<C-]>', ':bnext<CR>', opts)
 vim.api.nvim_set_keymap('t', '<leader><ESC>', '<C-\\><C-n>', opts)
 vim.api.nvim_set_keymap('n', '<leader>d', ':Trouble diagnostics toggle<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>g', ':GitMessenger<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>lg', ':LazyGit<CR>', opts)
 vim.api.nvim_set_keymap('n', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('v', 'd', '"_d', opts)
 vim.api.nvim_set_keymap('n', 'c', '"_c', opts)
@@ -122,21 +139,49 @@ vim.api.nvim_set_keymap('v', 'c', '"_c', opts)
 -- plugins setup
 require("nvim-lsp-installer").setup {}
 
-require("neo-tree").setup {
-    close_on_open = false,
-    close_if_last_window = true,
-    window = {
-        width = 40,
-        side = "left",
-        auto_resize = true,
-        mappings = {
-            ["o"] = "open"
-        }
+require('gitsigns').setup()
+require('telescope').setup()
+require('telescope').load_extension('fzf')
+require('ibl').setup()
+require('Comment').setup({
+    toggler = { line = '<leader>c<space>' },
+    opleader = { line = '<leader>c<space>' },
+})
+require('todo-comments').setup()
+
+require('conform').setup({
+    format_on_save = { timeout_ms = 500, lsp_fallback = true },
+    formatters_by_ft = {
+        go = { 'gofmt' },
+        python = { 'black' },
+        terraform = { 'terraform_fmt' },
+        sh = { 'shfmt' },
+        json = { 'jq' },
+        yaml = { 'prettier' },
     },
-    filesystem = {
-        hijack_netrw_behavior = "open_current"
+})
+
+vim.api.nvim_create_autocmd('BufEnter', {
+    nested = true,
+    callback = function()
+        if #vim.api.nvim_list_wins() == 1 and require('nvim-tree.utils').is_nvim_tree_buf() then
+            vim.cmd('quit')
+        end
+    end
+})
+
+require('nvim-tree').setup({
+    view = {
+        width = 40,
+        side = 'left',
+    },
+    hijack_netrw = true,
+    actions = {
+        open_file = {
+            quit_on_open = false,
+        }
     }
-}
+})
 
 -- Auto reload files when they change
 require("autoreload").setup({
@@ -224,4 +269,4 @@ vim.diagnostic.config {
     underline = true
 }
 
-vim.cmd('colorscheme murphy')
+vim.cmd('colorscheme carbonfox')
