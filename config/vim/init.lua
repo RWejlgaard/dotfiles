@@ -117,7 +117,7 @@ local opts = {
     noremap = true,
     silent = true
 }
-vim.api.nvim_set_keymap('n', 'tt', ':NvimTreeToggle<CR>', opts)
+vim.api.nvim_set_keymap('n', 't', ':NvimTreeToggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'qqq', ':qall<CR>', opts)
 vim.api.nvim_set_keymap('n', '<C-f>', ':Telescope find_files<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)

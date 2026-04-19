@@ -1,4 +1,4 @@
-FROM rockylinux:latest
+FROM almalinux:latest
 
 COPY ../. /workspace
 

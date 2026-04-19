@@ -12,11 +12,11 @@ jobs:
       matrix:
         distro:
           - alpine
+          - alma
           - archlinux
           - debian
           - fedora
           - opensuse
-          - rocky
           - ubuntu
     runs-on: ubuntu-latest
     steps:
@@ -31,3 +31,4 @@ jobs:
       - name: Only build
         run: |
           docker buildx build --platform linux/amd64 --output "type=image,push=false" -f tests/Dockerfile-${{ matrix.distro }} .
+
