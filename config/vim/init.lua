@@ -125,6 +125,8 @@ vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>v', ':vsplit<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>h', ':split<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>b', ':Buffers<CR>', opts)
+vim.api.nvim_set_keymap('n', '<C-[>', ':bprev<CR>', opts)
+vim.api.nvim_set_keymap('n', '<C-]>', ':bnext<CR>', opts)
 vim.api.nvim_set_keymap('t', '<leader><ESC>', '<C-\\><C-n>', opts)
 vim.api.nvim_set_keymap('n', '<leader>d', ':Trouble diagnostics toggle<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>g', ':GitMessenger<CR>', opts)
@@ -154,6 +156,15 @@ require('conform').setup({
         json = { 'jq' },
         yaml = { 'prettier' },
     },
+})
+
+vim.api.nvim_create_autocmd('BufEnter', {
+    nested = true,
+    callback = function()
+        if #vim.api.nvim_list_wins() == 1 and require('nvim-tree.utils').is_nvim_tree_buf() then
+            vim.cmd('quit')
+        end
+    end
 })
 
 require('nvim-tree').setup({
