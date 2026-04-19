@@ -1,10 +1,5 @@
--- Bootstrap packer, if it's not installed (first run)
-local fn = vim.fn
-local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
-if fn.empty(fn.glob(install_path)) > 0 then
-    Packer_bootstrap = fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim',
-        install_path })
-end
+-- ignorance is bliss - silence deprecation warnings on startup
+vim.deprecate = function () end
 
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -34,22 +29,16 @@ require('lazy').setup({
     { 'itchyny/lightline.vim' },             -- statusline
     { 'wookayin/fzf-ripgrep.vim' },          -- fzf ripgrep integration, for "<leader>/"
     { 'yuki-yano/fzf-preview.vim' },         -- fzf preview
-    { 'wbthomason/packer.nvim' },            -- package manager
     { 'fatih/vim-go' },                      -- go syntax highlighting
     { "ellisonleao/glow.nvim" },             -- markdown preview using :Glow
     { 'rhysd/git-messenger.vim' },           -- Show git messages under cursor
     { 'onsails/lspkind.nvim' },              -- lsp kind, makes autocomplete look better
-    { 'zbirenbaum/copilot.lua' },            -- copilot
     { 'hrsh7th/vim-vsnip' },
-    {                                       -- copilot addon for cmp
-        "zbirenbaum/copilot-cmp",
-        after = { "copilot.lua" },
-        config = function()
-            require("copilot_cmp").setup()
-        end
-    },
     { 'nvim-lua/plenary.nvim' },             -- lua utility functions
-    { 'CopilotC-Nvim/CopilotChat.nvim' },    -- copilot chat
+    {
+        "ccntrq/autoreload.nvim",
+        opts = {}, -- make sure setup is called with defaults
+    },
     {                                       -- adds file bars along the top similar to vscode
         'romgrk/barbar.nvim',
         dependencies = { 'kyazdani42/nvim-web-devicons' }
@@ -106,8 +95,6 @@ vim.opt.laststatus = 2
 vim.opt.mouse = 'a'
 vim.opt.clipboard = 'unnamed'
 vim.opt.scrolloff = 17
-vim.cmd('set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab')
-vim.opt.number = true
 vim.opt.colorcolumn = '80'
 vim.g.terraform_fmt_on_save = true
 
@@ -116,7 +103,7 @@ local opts = {
     noremap = true,
     silent = true
 }
-vim.api.nvim_set_keymap('n', 'nt', ':Neotree toggle<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>t', ':Neotree toggle<CR>', opts)
 vim.api.nvim_set_keymap('n', 'qqq', ':qall<CR>', opts)
 vim.api.nvim_set_keymap('n', '<C-f>', ':Files<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)
@@ -133,17 +120,6 @@ vim.api.nvim_set_keymap('n', 'c', '"_c', opts)
 vim.api.nvim_set_keymap('v', 'c', '"_c', opts)
 
 -- plugins setup
-require("CopilotChat").setup {}
-
-require("copilot").setup({
-    suggestion = {
-        enabled = false
-    },
-    panel = {
-        enabled = false
-    }
-})
-
 require("nvim-lsp-installer").setup {}
 
 require("neo-tree").setup {
@@ -162,16 +138,20 @@ require("neo-tree").setup {
     }
 }
 
--- Open NeoTree on startup when no file is specified
---vim.api.nvim_create_augroup('NeoTreeOnStartup', { clear = true })
---vim.api.nvim_create_autocmd('VimEnter', {
-  --group = 'NeoTreeOnStartup',
-  --callback = function()
-    --if vim.fn.argc() == 0 then
-      --vim.cmd('Neotree toggle')
-    --end
-  --end
---})
+-- Auto reload files when they change
+require("autoreload").setup({
+  autoread = true,
+  events = { "BufEnter", "FocusGained" },
+  timer = {
+    enabled = true,
+    interval_ms = 3000,
+    start_delay_ms = 0,
+  },
+  notify = {
+    on_conflict = true,
+    on_reload = true,
+  },
+})
 
 -- Language Server
 local lsp_zero = require('lsp-zero')
@@ -203,71 +183,37 @@ require('mason-lspconfig').setup({
 })
 
 local lspkind = require('lspkind')
-lspkind.init({
-    symbol_map = {
-        Copilot = ""
-    }
-})
-vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { -- 
-    fg = "#6CC644"
-})
+lspkind.init({})
 
 cmp.setup({
     formatting = {
         format = lspkind.cmp_format({
-            mode = 'symbol', -- show only symbol annotations
-            maxwidth = 70,   -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-            -- can also be a function to dynamically calculate max width such as
-            -- maxwidth = function() return math.floor(0.45 * vim.o.columns) end,
-            ellipsis_char = '...',    -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
-            show_labelDetails = true, -- show labelDetails in menu. Disabled by default
-
-            -- The function below will be called before any actual modifications from lspkind
-            -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-            before = function(_, vim_item)
-                -- do some customizations ...
-                return vim_item
-            end
+            mode = 'symbol',
+            maxwidth = 70,
+            ellipsis_char = '...',
+            show_labelDetails = true,
         })
     },
     snippet = {
-        -- REQUIRED - you must specify a snippet engine
         expand = function(args)
-            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-            -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-            -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-            -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+            vim.fn["vsnip#anonymous"](args.body)
         end
     },
-    window = {
-        -- completion = cmp.config.window.bordered(),
-        -- documentation = cmp.config.window.bordered(),
-    },
+    window = {},
     mapping = cmp.mapping.preset.insert({
         ['<C-b>'] = cmp.mapping.scroll_docs(-4),
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
         ['<C-Space>'] = cmp.mapping.complete(),
         ['<C-e>'] = cmp.mapping.abort(),
-        ['<CR>'] = cmp.mapping.confirm({
-            select = true
-        }) -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        ['<CR>'] = cmp.mapping.confirm({ select = true })
     }),
-    sources = cmp.config.sources({ {
-        name = 'copilot'
+    sources = cmp.config.sources({
+        { name = 'nvim_lsp' },
+        { name = 'nvim_lua' },
+        { name = 'path' },
     }, {
-        name = 'nvim_lsp'
-    }, {
-        name = 'nvim_lua'
-    }, {
-        name = 'path'
-    } -- For vsnip users.
-        -- { name = 'luasnip' }, -- For luasnip users.
-        -- { name = 'ultisnips' }, -- For ultisnips users.
-        -- { name = 'snippy' }, -- For snippy users.
-    }, { {
-        name = 'buffer'
-    } })
+        { name = 'buffer' },
+    })
 })
 
 -- enable diagnostics for showing in-line
