@@ -23,6 +23,3 @@ fi
 
 # tmux
 cp config/tmux/tmux.conf ~/.tmux.conf
-
-# kitty
-cp config/kitty/kitty.conf ~/.config/kitty/
