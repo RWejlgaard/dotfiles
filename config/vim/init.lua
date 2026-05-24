@@ -15,6 +15,30 @@ local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
 require('lazy').setup({
+    {
+        'okuuva/auto-save.nvim',             -- auto-save buffers on changes
+        event = { 'InsertLeave', 'TextChanged' },
+        opts = {},
+    },
+    {
+        'vimwiki/vimwiki',                   -- personal wiki with markdown syntax
+        init = function()
+            vim.g.vimwiki_list = {
+                {
+                    path = '~/vimwiki/',
+                    syntax = 'markdown',
+                    ext = '.md',
+                },
+            }
+            vim.g.vimwiki_global_ext = 0
+            -- vimwiki's InsertLeave table auto-formatter mutates the buffer
+            -- and clobbers markview's extmarks, breaking the preview
+            vim.g.vimwiki_table_auto_fmt = 0
+            -- treesitter has no vimwiki parser; route vimwiki buffers
+            -- through the markdown parser so markview can re-render
+            vim.treesitter.language.register('markdown', 'vimwiki')
+        end,
+    },
     { 'lewis6991/gitsigns.nvim' },            -- show git changes in the gutter
     { 'hashivim/vim-terraform' },            -- terraform syntax highlighting
     {
@@ -39,7 +63,16 @@ require('lazy').setup({
     { 'wookayin/fzf-ripgrep.vim' },          -- fzf ripgrep integration, for "<leader>/"
     { 'yuki-yano/fzf-preview.vim' },         -- fzf preview
     { 'fatih/vim-go' },                      -- go syntax highlighting
-    { 'OXY2DEV/markview.nvim' },             -- markdown preview in-buffer
+    {                                        -- markdown preview in-buffer
+        'OXY2DEV/markview.nvim',
+        ft = { 'markdown', 'yaml', 'vimwiki' },
+        opts = {
+            preview = {
+                filetypes = { 'markdown', 'quarto', 'rmd', 'typst', 'vimwiki' },
+            },
+            yaml = { enable = true },
+        },
+    },
     { 'folke/flash.nvim', opts = {} },       -- fast motion/jump anywhere on screen
     { 'windwp/nvim-autopairs', event = 'InsertEnter', opts = {} },
     {
@@ -140,6 +173,8 @@ vim.api.nvim_set_keymap('n', '<leader>/', ':Rg<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>v', ':vsplit<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>h', ':split<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>b', ':Buffers<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>[', ':bprev<CR>', opts)
+vim.api.nvim_set_keymap('n', '<leader>]', ':bnext<CR>', opts)
 vim.api.nvim_set_keymap('t', '<leader><ESC>', '<C-\\><C-n>', opts)
 vim.api.nvim_set_keymap('n', '<leader>d', ':Trouble diagnostics toggle<CR>', opts)
 vim.api.nvim_set_keymap('n', '<leader>g', ':GitMessenger<CR>', opts)

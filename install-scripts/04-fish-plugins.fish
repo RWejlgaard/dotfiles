@@ -1,15 +1,7 @@
 #!/usr/bin/env fish
 
-# tide
-fisher install IlanCosman/tide
+# simple prompt
+fisher install RWejlgaard/simple.fish
 
-# setup tide
-tide configure \
-    --auto \
-    --style=Lean \
-    --prompt_colors='True color' \
-    --show_time='24-hour format' \
-    --lean_prompt_height='One line' \
-    --prompt_spacing=Compact \
-    --icons='Few icons' \
-    --transient=No
+# history-sync.fish - sync shell history
+fisher install RWejlgaard/history-sync.fish
