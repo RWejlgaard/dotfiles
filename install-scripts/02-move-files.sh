@@ -23,3 +23,6 @@ fi
 
 # tmux
 cp config/tmux/tmux.conf ~/.tmux.conf
+mkdir -p ~/.tmux/scripts
+cp config/tmux/scripts/*.sh ~/.tmux/scripts/
+chmod +x ~/.tmux/scripts/*.sh
