@@ -26,3 +26,7 @@ cp config/tmux/tmux.conf ~/.tmux.conf
 mkdir -p ~/.tmux/scripts
 cp config/tmux/scripts/*.sh ~/.tmux/scripts/
 chmod +x ~/.tmux/scripts/*.sh
+# only copy status.conf if it doesn't exist, so local customizations are preserved
+if [ ! -f ~/.tmux/scripts/status.conf ]; then
+    cp config/tmux/scripts/status.conf ~/.tmux/scripts/
+fi
