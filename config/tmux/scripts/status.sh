@@ -24,15 +24,16 @@ gadget_battery() {
     [ -z "$output" ] && return
     percent=$(echo "$output" | grep -oP '\d+(?=%)')
     time=$(echo "$output" | grep -oP '\d+:\d+:\d+')
+    [ "$percent" -le 20 ] && colour=colour1 || { [ "$percent" -le 50 ] && colour=colour3 || colour=colour2; }
     if [ -n "$time" ]; then
         h=$(echo "$time" | cut -d: -f1 | sed 's/^0//')
         m=$(echo "$time" | cut -d: -f2 | sed 's/^0//')
         [ -z "$h" ] && h=0
         [ -z "$m" ] && m=0
         [ "$h" -gt 0 ] && fmt="${h}h ${m}m" || fmt="${m}m"
-        echo "BAT: ${percent}% - ${fmt}"
+        echo "BAT: #[fg=$colour]${percent}%#[fg=colour7] - ${fmt}"
     else
-        echo "BAT: ${percent}%"
+        echo "BAT: #[fg=$colour]${percent}%#[fg=colour7]"
     fi
 }
 
