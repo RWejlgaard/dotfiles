@@ -45,22 +45,26 @@ gadget_bluetooth() {
 
 gadget_battery() {
     if [ "$OS" = "Darwin" ]; then
-        local line percent time state fmt
-        line=$(pmset -g batt 2>/dev/null | grep "InternalBattery" | head -1)
-        [ -z "$line" ] && return
-        percent=$(echo "$line" | grep -oE '[0-9]+%' | tr -d '%')
-        [ -z "$percent" ] && return
-        state=$(echo "$line" | awk -F';' '{gsub(/^[ \t]+/,"",$2); print $2}')
-        time=$(echo "$line" | grep -oE '[0-9]+:[0-9]+' | head -1)
+        # ioreg reports a usable TimeRemaining (minutes) even when pmset
+        # still says "(no estimate)" shortly after un/plugging.
+        local data cur max remain percent fmt
+        data=$(ioreg -rn AppleSmartBattery 2>/dev/null)
+        [ -z "$data" ] && return
+        cur=$(echo "$data" | awk -F' = ' '/"AppleRawCurrentCapacity"/{print $2; exit}')
+        max=$(echo "$data" | awk -F' = ' '/"AppleRawMaxCapacity"/{print $2; exit}')
+        remain=$(echo "$data" | awk -F' = ' '/"TimeRemaining"/{print $2; exit}')
+        { [ -z "$cur" ] || [ -z "$max" ] || [ "$max" -eq 0 ] 2>/dev/null; } && return
+        percent=$(( cur * 100 / max ))
         [ "$percent" -le 20 ] && colour=colour1 || { [ "$percent" -le 50 ] && colour=colour3 || colour=colour2; }
-        if [ "$state" = "charged" ] || [ -z "$time" ] || [ "$time" = "0:00" ]; then
-            echo "BAT: #[fg=$colour]${percent}%#[fg=colour7]"
-        else
+        # 65535 is the sentinel for "not yet calculated".
+        if [ -n "$remain" ] && [ "$remain" -gt 0 ] 2>/dev/null && [ "$remain" -lt 65535 ] 2>/dev/null; then
             local h m
-            h=$(echo "$time" | cut -d: -f1)
-            m=$(echo "$time" | cut -d: -f2)
-            [ "$h" -gt 0 ] 2>/dev/null && fmt="${h}h ${m}m" || fmt="${m}m"
+            h=$(( remain / 60 ))
+            m=$(( remain % 60 ))
+            [ "$h" -gt 0 ] && fmt="${h}h ${m}m" || fmt="${m}m"
             echo "BAT: #[fg=$colour]${percent}%#[fg=colour7] - ${fmt}"
+        else
+            echo "BAT: #[fg=$colour]${percent}%#[fg=colour7]"
         fi
         return
     fi
