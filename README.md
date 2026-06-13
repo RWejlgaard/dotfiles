@@ -75,10 +75,12 @@ Installs essential packages based on your OS:
 - **FreeBSD**: Uses pkg
 
 ### 2. File Deployment (`02-move-files.sh`)
-Copies configuration files to their proper locations:
+Symlinks configuration files to their proper locations:
 - Creates necessary directories (`~/.config/nvim`, `~/.config/fish`, etc.)
-- Copies config files to home directory
-- Preserves existing `envvars.fish` if present
+- Symlinks tracked config files into the home directory, so edits to the
+  live config flow straight back to the repo
+- Copies (rather than symlinks) `envvars.fish` and `status.conf` so per-machine
+  customizations are preserved, and only if they don't already exist
 
 ### 3. Fisher Installation (`03-fisher-install.fish`)
 Installs Fisher, the Fish shell plugin manager

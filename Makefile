@@ -12,4 +12,4 @@ refresh:
 	@bash ./install-scripts/02-move-files.sh
 	@exec fish
 
-.PHONY: full-install
+.PHONY: full-install refresh
