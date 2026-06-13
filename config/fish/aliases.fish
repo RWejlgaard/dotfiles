@@ -1,7 +1,7 @@
 # aliases
 
 # Package manager aliases
-if [ uname = "Darwin" ]
+if test (uname) = "Darwin"
     alias get="brew install"
     alias search="brew search"
 else if [ -f /etc/arch-release ]
@@ -13,7 +13,7 @@ else if [ -f /etc/lsb-release ]
 else if [ -f /etc/alpine-release ]
     alias get="apk add"
     alias search="apk search"
-else if [ uname = "FreeBSD" ]
+else if test (uname) = "FreeBSD"
     alias get="sudo pkg install -y"
     alias search="pkg search"
 else if [ -f /etc/gentoo-release ]
@@ -40,5 +40,5 @@ end
 
 # Volume control (pipewire)
 function vol
-    wpctl set-volume @DEFAULT_SINK@ $argv% 2>&1 > /dev/null
+    wpctl set-volume @DEFAULT_SINK@ $argv% > /dev/null 2>&1
 end
