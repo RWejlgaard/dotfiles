@@ -4,10 +4,10 @@ A comprehensive dotfiles setup for a modern development environment featuring Ne
 
 ## Features
 
-- **Neovim**: Fully configured with LSP, autocompletion, Git integration, and modern plugins
-- **Fish Shell**: Enhanced with tide prompt, aliases, and productivity functions
-- **Tmux**: Configured with custom keybindings, mouse support, and status bar
-- **Cross-platform**: Supports macOS, Linux (Arch, Debian/Ubuntu, Alpine), and FreeBSD
+- **Neovim**: Fully configured with LSP, autocompletion, Git integration, and modern plugins (managed by lazy.nvim)
+- **Fish Shell**: Lightweight `simple.fish` prompt, cross-machine history sync, aliases, and productivity functions
+- **Tmux**: Custom keybindings, mouse support, and a modular status bar with toggleable gadgets
+- **Cross-platform**: Supports macOS, Linux (Arch, Debian/Ubuntu, Alpine, Fedora/RHEL, Gentoo), and FreeBSD
 - **Automated Setup**: One-command installation via Makefile
 
 ## Quick Install
@@ -18,67 +18,113 @@ make
 
 The setup will automatically detect your operating system and install all necessary packages and configurations.
 
+To re-sync just the config file symlinks (without reinstalling packages or plugins):
+
+```bash
+make refresh
+```
+
+## Repository Layout
+
+```
+config/
+  vim/init.lua              # Neovim configuration
+  fish/config.fish          # Fish entrypoint (greeting + $EDITOR)
+  fish/aliases.fish         # Shell aliases (deployed to conf.d/)
+  fish/functions.fish       # Shell functions (deployed to conf.d/)
+  fish/envvars.fish         # Environment variables (copied, per-machine)
+  tmux/tmux.conf            # Tmux configuration
+  tmux/scripts/status.sh    # Modular status bar renderer
+  tmux/scripts/status.conf  # Status gadget list (copied, per-machine)
+  tmux/scripts/bluetooth-menu.sh  # Bluetooth popup menu
+install-scripts/            # Numbered setup scripts run by the Makefile
+scripts/                    # Misc helper scripts (e.g. Gentoo kernel upgrade)
+tests/                      # Dockerfiles used by CI to test installs per distro
+```
+
 ## Config Files Overview
 
-### `init.lua` - Neovim Configuration
-- **Location**: `~/.config/nvim/init.lua`
+### `config/vim/init.lua` - Neovim Configuration
+- **Deployed to**: `~/.config/nvim/init.lua` (symlinked)
 - **Purpose**: Complete Neovim setup with modern IDE-like features
 - **Features**:
-  - Plugin management with Packer
-  - LSP support for multiple languages (Go, Python, Terraform, Bash, etc.)
-  - Autocompletion with nvim-cmp and GitHub Copilot
-  - File explorer (Neo-tree), fuzzy finder (fzf), and diagnostics
-  - Git integration with fugitive and git-gutter
+  - Plugin management with [lazy.nvim](https://github.com/folke/lazy.nvim) (bootstraps itself on first launch)
+  - LSP support via Mason for Bash, Docker, Go, JSON, YAML, Python, and Lua
+  - Autocompletion with nvim-cmp
+  - File explorer (nvim-tree), fuzzy finding (fzf + Telescope), and diagnostics
+  - Git integration with fugitive and gitsigns
   - Syntax highlighting with Treesitter
-  - Custom keybindings and carbonfox colorscheme
+  - Custom keybindings and the carbonfox colorscheme (nightfox.nvim)
 
-### `config.fish` - Fish Shell Configuration
-- **Location**: `~/.config/fish/config.fish`
-- **Purpose**: Main Fish shell configuration with aliases and functions
+### `config/fish/config.fish` - Fish Shell Entrypoint
+- **Deployed to**: `~/.config/fish/config.fish` (symlinked)
+- **Purpose**: Minimal Fish entrypoint
+- **Features**:
+  - Silences the welcome greeting
+  - Sets `$EDITOR` to `nvim`
+
+### `config/fish/aliases.fish` - Fish Aliases
+- **Deployed to**: `~/.config/fish/conf.d/aliases.fish` (symlinked)
+- **Purpose**: Command aliases loaded automatically by Fish
 - **Features**:
   - OS-specific package manager aliases (`get`, `search`)
+  - Tooling aliases: `vim` → nvim, `cat` → bat, `ls` → eza, `lg` → lazygit
   - Kubernetes shortcuts (`k`, `kp`, `kc`)
-  - Vim/Neovim aliases and integrations
-  - Custom functions for `cheat` lookup and Git workflows
-  - TTY fixes for Asahi Linux
-  - Bash-like `!!` history expansion
+  - Gentoo and PipeWire volume helpers
 
-### `envvars.fish` - Environment Variables
-- **Location**: `~/.config/fish/conf.d/envvars.fish`
-- **Purpose**: Environment variable definitions for Fish shell
+### `config/fish/functions.fish` - Fish Functions
+- **Deployed to**: `~/.config/fish/conf.d/functions.fish` (symlinked)
+- **Purpose**: Custom shell functions
 - **Features**:
-  - PATH additions for `~/bin` and `~/.local/bin`
-  - Template for additional environment variables
+  - Bash-like `!!` history expansion
+  - `cheat` lookup against cht.sh
+  - `gitissue` helper to branch off a fresh `master`
 
-### `tmux.conf` - Tmux Configuration
-- **Location**: `~/.tmux.conf`
+### `config/fish/envvars.fish` - Environment Variables
+- **Deployed to**: `~/.config/fish/conf.d/envvars.fish` (copied, not symlinked)
+- **Purpose**: Per-machine environment variable definitions
+- **Note**: Only copied if it doesn't already exist, so local customizations are preserved
+
+### `config/tmux/tmux.conf` - Tmux Configuration
+- **Deployed to**: `~/.tmux.conf` (symlinked)
 - **Purpose**: Tmux terminal multiplexer configuration
 - **Features**:
   - Custom prefix key (Ctrl+A)
-  - Alt-based keybindings for panes and windows
+  - Alt-based keybindings for panes, windows, and resizing
   - Mouse support enabled
-  - Status bar with CPU/RAM monitoring
-  - Plugin management with TPM
-  - 256-color terminal support
+  - Truecolor passthrough
+  - Modular status bar driven by `status.sh`
+  - Bluetooth popup menu bound to `prefix + b`
+  - Plugin management with TPM (tpm, tmux-better-mouse-mode)
+
+### `config/tmux/scripts/` - Tmux Status Scripts
+- **Deployed to**: `~/.tmux/scripts/` (`.sh` symlinked, `status.conf` copied)
+- **Purpose**: Render the status bar and power the Bluetooth menu
+- **Features**:
+  - `status.sh`: renders gadgets (WLAN, Bluetooth, battery, CPU, memory, temperature, disk) cross-platform (macOS + Linux)
+  - `status.conf`: lists the enabled gadgets and their order — comment out a line to disable a gadget (copied per-machine so local edits stick)
+  - `bluetooth-menu.sh`: interactive Bluetooth device menu
 
 ## Installation Process
 
-The Makefile runs 7 sequential scripts for a complete setup:
+The Makefile's `full-install` target runs 7 sequential scripts for a complete setup:
 
 ### 1. Package Installation (`01-install-packages.sh`)
 Installs essential packages based on your OS:
-- **Common packages**: tmux, neovim, git, fish, curl, bat, go, npm, ripgrep
-- **macOS**: Uses Homebrew
-- **Arch Linux**: Uses pacman and installs yay AUR helper
-- **Debian/Ubuntu**: Uses apt
+- **Common packages**: tmux, neovim, git, fish, curl, bat, go, eza, ripgrep, lazygit
+- **macOS**: Uses Homebrew (installs it first if missing)
+- **Arch Linux**: Uses pacman and installs the yay AUR helper
+- **Debian/Ubuntu**: Uses apt (`go` → `golang`, skips lazygit)
 - **Alpine**: Uses apk
+- **Fedora/RHEL/CentOS**: Uses dnf (skips curl and lazygit)
 - **FreeBSD**: Uses pkg
+- **Gentoo**: Uses emerge (`git` → `dev-vcs/git`)
 
 ### 2. File Deployment (`02-move-files.sh`)
 Symlinks configuration files to their proper locations:
-- Creates necessary directories (`~/.config/nvim`, `~/.config/fish`, etc.)
-- Symlinks tracked config files into the home directory, so edits to the
-  live config flow straight back to the repo
+- Creates necessary directories (`~/.config/nvim`, `~/.config/fish`, `~/.tmux/scripts`, etc.)
+- Symlinks tracked config files into place, so edits to the live config flow
+  straight back to the repo
 - Copies (rather than symlinks) `envvars.fish` and `status.conf` so per-machine
   customizations are preserved, and only if they don't already exist
 
@@ -86,26 +132,26 @@ Symlinks configuration files to their proper locations:
 Installs Fisher, the Fish shell plugin manager
 
 ### 4. Fish Plugins (`04-fish-plugins.fish`)
-Installs and configures Fish plugins:
-- **Tide**: Modern, customizable prompt with Git integration
-- Pre-configured with lean style and 24-hour time format
+Installs Fish plugins:
+- **simple.fish**: a minimal, fast prompt
+- **history-sync.fish**: keeps shell history in sync across sessions/machines
 
 ### 5. Tmux Plugins (`05-tmux-plugins.fish`)
 Sets up Tmux plugin management:
-- Installs TPM (Tmux Plugin Manager)
-- Installs configured plugins (better mouse mode, CPU monitoring)
+- Installs TPM (Tmux Plugin Manager) if missing
+- Installs/updates configured plugins (tmux-better-mouse-mode)
 
 ### 6. Neovim Setup (`06-vim-setup.fish`)
-Configures Neovim:
-- Bootstraps Packer plugin manager
-- Installs all configured plugins
-- Sets up LSP servers via Mason
+With lazy.nvim no manual bootstrapping is required — plugins and LSP servers
+install automatically the first time Neovim launches. This script is kept as a
+placeholder for future setup steps.
 
 ### 7. Final Configuration (`07-last-touches.sh`)
 Completes the setup:
 - Adds Fish to `/etc/shells`
-- Changes default shell to Fish
-- Creates `~/bin` directory for personal scripts
+- Changes the default shell to Fish
+- Creates `~/bin` for personal scripts
+- On Gentoo, installs the appropriate kernel-upgrade helper (OpenRC or systemd)
 
 ## Manual Setup
 
@@ -116,15 +162,20 @@ If you prefer manual installation or want to customize the process:
    ```bash
    # Neovim
    mkdir -p ~/.config/nvim
-   cp init.lua ~/.config/nvim/
-   
+   ln -sf "$PWD/config/vim/init.lua" ~/.config/nvim/init.lua
+
    # Fish
    mkdir -p ~/.config/fish/conf.d
-   cp config.fish ~/.config/fish/
-   cp envvars.fish ~/.config/fish/conf.d/
-   
+   ln -sf "$PWD/config/fish/config.fish" ~/.config/fish/config.fish
+   ln -sf "$PWD/config/fish/aliases.fish" ~/.config/fish/conf.d/aliases.fish
+   ln -sf "$PWD/config/fish/functions.fish" ~/.config/fish/conf.d/functions.fish
+   cp "$PWD/config/fish/envvars.fish" ~/.config/fish/conf.d/
+
    # Tmux
-   cp tmux.conf ~/.tmux.conf
+   ln -sf "$PWD/config/tmux/tmux.conf" ~/.tmux.conf
+   mkdir -p ~/.tmux/scripts
+   ln -sf "$PWD"/config/tmux/scripts/*.sh ~/.tmux/scripts/
+   cp "$PWD/config/tmux/scripts/status.conf" ~/.tmux/scripts/
    ```
 3. **Run individual scripts**: Execute scripts in `install-scripts/` directory in order
 
@@ -145,10 +196,12 @@ After installation:
 ## Customization
 
 All configuration files are designed to be easily customizable:
-- **Add Fish aliases**: Edit `config.fish`
-- **Modify Neovim plugins**: Edit `init.lua`
-- **Change Tmux keybindings**: Edit `tmux.conf`
-- **Add environment variables**: Edit `envvars.fish`
+- **Add Fish aliases**: Edit `config/fish/aliases.fish`
+- **Add Fish functions**: Edit `config/fish/functions.fish`
+- **Modify Neovim plugins**: Edit `config/vim/init.lua`
+- **Change Tmux keybindings**: Edit `config/tmux/tmux.conf`
+- **Toggle status bar gadgets**: Edit `~/.tmux/scripts/status.conf`
+- **Add environment variables**: Edit `~/.config/fish/conf.d/envvars.fish`
 
 ## Troubleshooting
 
@@ -167,7 +220,7 @@ When you submit a pull request, the following automated checks run:
 
 - **Multi-distro Testing**: The installation is tested on:
   - Alpine Linux
-  - Arch Linux  
+  - Arch Linux
   - Fedora
   - Ubuntu
 
