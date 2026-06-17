@@ -27,6 +27,5 @@ function gitissue
   git reset --hard
   git checkout master
   git pull origin master
-  git branch $argv[1]
-  git checkout $argv[1]
+  git checkout -b $argv[1]
 end

@@ -1,6 +1,6 @@
 FROM fedora:latest
 
-COPY ../. /workspace
+COPY . /workspace
 
 WORKDIR /workspace
 
@@ -8,3 +8,8 @@ RUN dnf -y update
 RUN dnf -y install make sudo
 
 RUN make
+
+# Verify the install actually landed, not just that `make` exited 0.
+RUN test -L /root/.config/nvim/init.lua \
+ && test -L /root/.config/fish/conf.d/aliases.fish \
+ && fish -c 'functions -q gitissue'

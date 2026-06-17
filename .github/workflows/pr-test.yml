@@ -7,6 +7,22 @@ on:
       - main
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ShellCheck
+        run: |
+          shellcheck install-scripts/*.sh config/tmux/scripts/*.sh scripts/*
+
+      - name: Fish syntax check
+        run: |
+          sudo apt-get update && sudo apt-get install -y fish
+          for f in config/fish/*.fish install-scripts/*.fish; do
+            fish --no-execute "$f"
+          done
+
   test:
     strategy:
       matrix:

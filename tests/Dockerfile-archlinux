@@ -1,10 +1,15 @@
 FROM archlinux:latest
 
-COPY ../. /workspace
+COPY . /workspace
 
 WORKDIR /workspace
 
 RUN pacman -Syy
-RUN pacman -S --noconfirm make sudo git which
+RUN pacman -S --noconfirm make sudo git
 
 RUN make
+
+# Verify the install actually landed, not just that `make` exited 0.
+RUN test -L /root/.config/nvim/init.lua \
+ && test -L /root/.config/fish/conf.d/aliases.fish \
+ && fish -c 'functions -q gitissue'

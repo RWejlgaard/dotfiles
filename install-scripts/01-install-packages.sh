@@ -2,6 +2,7 @@
 set -e # exit on error
 
 exclude() {
+    # shellcheck disable=SC2207 # word-splitting the filtered list is intended
     PACKAGES=( $(printf '%s\n' "${PACKAGES[@]}" | grep -vxE "$(IFS='|'; echo "$*")") )
 }
 
@@ -24,7 +25,7 @@ PACKAGES=(
 
 # if MacOS install Homebrew
 if [ "$(uname)" == "Darwin" ]; then
-    if [ ! -x "$(which brew)" ]; then
+    if ! command -v brew >/dev/null 2>&1; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
     # install packages
@@ -34,7 +35,7 @@ fi
 # if Arch install
 if [ -f /etc/arch-release ]; then
     # install yay
-    if [ -z "$(which yay)" ] && [ "$EUID" -ne 0 ]; then
+    if ! command -v yay >/dev/null 2>&1 && [ "$EUID" -ne 0 ]; then
         sudo pacman -S --noconfirm base-devel
         git clone https://aur.archlinux.org/yay.git
         cd yay
