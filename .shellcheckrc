@@ -1,0 +1,10 @@
+# Intentional idioms used throughout this repo — silenced so the lint gate
+# surfaces real problems instead of noise.
+#
+# SC2015 - `cond && a || b` colour-picking idiom; `a` (a var assignment) always
+#          succeeds, so this is a safe ternary here.
+# SC2059 - printf format strings intentionally embed escape sequences / unicode.
+# SC2162 - interactive `read` prompts where backslash mangling is irrelevant.
+# SC2012 - `ls` on predictable kernel/boot filenames in the Gentoo helpers.
+# SC2010 - `ls | grep` on the same predictable filenames.
+disable=SC2015,SC2059,SC2162,SC2012,SC2010

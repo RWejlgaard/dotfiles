@@ -1,13 +1,16 @@
 #!/bin/bash
+set -e # exit on error
+
+fish_path="$(command -v fish)"
 
 # ensure fish is in shells
-if ! grep -q "$(which fish)" /etc/shells; then
-    echo "$(which fish)" | sudo tee -a /etc/shells
+if ! grep -q "$fish_path" /etc/shells; then
+    echo "$fish_path" | sudo tee -a /etc/shells
 fi
 
 # change shell to fish
-if ! [ "$(basename $SHELL)" == "fish" ]; then
-    chsh -s $(which fish)
+if ! [ "$(basename "$SHELL")" == "fish" ]; then
+    chsh -s "$fish_path"
 fi
 
 # create local bin directory

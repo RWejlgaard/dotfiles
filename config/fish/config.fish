@@ -1,2 +1,2 @@
-export fish_greeting="" # Silence welcome message
-export EDITOR=nvim
+set -g fish_greeting "" # Silence welcome message
+set -gx EDITOR nvim

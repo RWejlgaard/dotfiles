@@ -98,8 +98,8 @@ gadget_cpu() {
     fi
     read_stat() { awk '/^cpu /{print $2+$3+$4+$5+$6+$7+$8, $5}' /proc/stat; }
     s1=$(read_stat); sleep 0.5; s2=$(read_stat)
-    total=$(($(echo $s2|cut -d' ' -f1) - $(echo $s1|cut -d' ' -f1)))
-    idle=$(($(echo $s2|cut -d' ' -f2) - $(echo $s1|cut -d' ' -f2)))
+    total=$(($(echo "$s2"|cut -d' ' -f1) - $(echo "$s1"|cut -d' ' -f1)))
+    idle=$(($(echo "$s2"|cut -d' ' -f2) - $(echo "$s1"|cut -d' ' -f2)))
     percent=$(( (total - idle) * 100 / total ))
     [ "$percent" -ge 80 ] && colour=colour1 || { [ "$percent" -ge 50 ] && colour=colour3 || colour=colour2; }
     echo "CPU: #[fg=$colour]${percent}%#[fg=colour7]"
