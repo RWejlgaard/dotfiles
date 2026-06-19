@@ -22,7 +22,12 @@ else if [ -f /etc/gentoo-release ]
 end
 
 alias vim=nvim
-alias cat="bat -Pp"
+if type -q bat
+    alias cat="bat -Pp"
+else if type -q batcat
+    # Debian/Ubuntu ship bat's binary as batcat to avoid a name clash
+    alias cat="batcat -Pp"
+end
 alias lg=lazygit
 alias ls=eza
 
