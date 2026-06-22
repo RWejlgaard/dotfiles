@@ -8,7 +8,6 @@ else if [ -f /etc/arch-release ]
     alias get="sudo pacman -S"
     alias search="pacman -Ss"
 else if [ -f /etc/debian_version ]
-    # matches the installer, which keys Debian/Ubuntu off /etc/debian_version
     alias get="sudo apt install"
     alias search="apt search"
 else if [ -f /etc/alpine-release ]

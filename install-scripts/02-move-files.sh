@@ -1,13 +1,12 @@
 #!/bin/bash
-set -euo pipefail # exit on error, unset vars, and failed pipes
+set -euo pipefail
 
 # Symlink tracked config files into place so edits to the live config flow
 # straight back to the repo (no more "tweaked it and lost it on refresh").
 # Resolve the repo root so this works regardless of where it's invoked from.
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Symlink SRC -> DEST, but back up any pre-existing *real* file (not a symlink)
-# to DEST.bak first so a fresh-machine install never clobbers existing configs.
+# Symlink SRC -> DEST, backing up any pre-existing real file to DEST.bak first.
 link() {
     local src="$1" dest="$2"
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
