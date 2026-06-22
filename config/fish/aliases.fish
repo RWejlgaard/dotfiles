@@ -7,7 +7,7 @@ if test (uname) = "Darwin"
 else if [ -f /etc/arch-release ]
     alias get="sudo pacman -S"
     alias search="pacman -Ss"
-else if [ -f /etc/lsb-release ]
+else if [ -f /etc/debian_version ]
     alias get="sudo apt install"
     alias search="apt search"
 else if [ -f /etc/alpine-release ]
