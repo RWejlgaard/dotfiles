@@ -10,10 +10,17 @@ function cheat --description "help <field> <topic>"
 	curl "cht.sh/$argv[1]/$args"
 end
 
-# update master and create a branch with value: $1
+# update the default branch and create a fresh branch with value: $1
 function gitissue
   if test -z "$argv[1]"
     echo "usage: gitissue <branch-name>"
+    return 1
+  end
+  # Detect the remote's default branch instead of assuming `master`,
+  # so this works on repos that use `main` (or anything else).
+  set -l default (git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | string replace 'origin/' '')
+  if test -z "$default"
+    echo "Could not determine origin's default branch; run 'git remote set-head origin -a' first."
     return 1
   end
   # `git reset --hard` discards uncommitted work, so confirm first.
@@ -25,7 +32,7 @@ function gitissue
     end
   end
   git reset --hard
-  git checkout master
-  git pull origin master
+  git checkout $default
+  git pull origin $default
   git checkout -b $argv[1]
 end
