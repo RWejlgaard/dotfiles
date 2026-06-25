@@ -127,18 +127,28 @@ require('lazy').setup({
             require('nvim-terminal').setup()
         end
     },
-    {                                       -- mason, easy download and install of LSPs
-        "williamboman/mason.nvim",
-        "williamboman/mason-lspconfig.nvim",
-        "neovim/nvim-lspconfig"
+    {                                       -- mason: install & manage LSP servers
+        'mason-org/mason.nvim',
+        opts = {},
     },
-    {                                       -- LSP
-        'VonHeikemen/lsp-zero.nvim',
-        dependencies = {                                                    -- LSP Support
-            { 'neovim/nvim-lspconfig' }, { 'williamboman/nvim-lsp-installer' }, -- Autocompletion
-            { 'hrsh7th/nvim-cmp' }, { 'hrsh7th/cmp-buffer' }, { 'hrsh7th/cmp-path' }, { 'saadparwaiz1/cmp_luasnip' },
-            { 'hrsh7th/cmp-nvim-lsp' }, { 'hrsh7th/cmp-nvim-lua' },     -- Snippets
-            { 'L3MON4D3/LuaSnip' }, { 'rafamadriz/friendly-snippets' } }
+    {                                       -- bridge mason <-> lspconfig; auto-enables installed servers
+        'mason-org/mason-lspconfig.nvim',
+        dependencies = {
+            'mason-org/mason.nvim',
+            'neovim/nvim-lspconfig',
+        },
+        opts = {
+            ensure_installed = { 'bashls', 'dockerls', 'gopls', 'jsonls', 'yamlls', 'pyright', 'lua_ls' },
+        },
+    },
+    {                                       -- autocompletion
+        'hrsh7th/nvim-cmp',
+        dependencies = {
+            'hrsh7th/cmp-buffer', 'hrsh7th/cmp-path',
+            'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-nvim-lua',
+            'saadparwaiz1/cmp_luasnip',
+            'L3MON4D3/LuaSnip', 'rafamadriz/friendly-snippets',
+        },
     },
 })
 
@@ -188,8 +198,6 @@ vim.api.nvim_set_keymap('n', 'c', '"_c', opts)
 vim.api.nvim_set_keymap('v', 'c', '"_c', opts)
 
 -- plugins setup
-require("nvim-lsp-installer").setup {}
-
 require('gitsigns').setup()
 require('telescope').setup()
 require('telescope').load_extension('fzf')
@@ -249,33 +257,44 @@ require("autoreload").setup({
   },
 })
 
--- Language Server
-local lsp_zero = require('lsp-zero')
+-- Language Server (native LSP, Neovim 0.11+)
+-- mason-lspconfig auto-enables the servers it installs; we only supply the
+-- shared completion capabilities and the lua_ls runtime settings here.
 local cmp = require('cmp')
 
-lsp_zero.on_attach(function(_, bufnr)
-    lsp_zero.default_keymaps({
-        buffer = bufnr
-    })
-end)
+vim.lsp.config('*', {
+    capabilities = require('cmp_nvim_lsp').default_capabilities(),
+})
 
-require('mason').setup({})
-require('mason-lspconfig').setup({
-    ensure_installed = {
-        'bashls',
-        'dockerls',
-        'gopls',
-        'jsonls',
-        'yamlls',
-        'pyright',
+-- Teach lua_ls about the Neovim runtime and the `vim` global.
+vim.lsp.config('lua_ls', {
+    settings = {
+        Lua = {
+            runtime = { version = 'LuaJIT' },
+            diagnostics = { globals = { 'vim' } },
+            workspace = {
+                library = vim.api.nvim_get_runtime_file('', true),
+                checkThirdParty = false,
+            },
+            telemetry = { enable = false },
+        },
     },
-    handlers = {
-        lsp_zero.default_setup,
-        lua_ls = function()
-            local lua_opts = lsp_zero.nvim_lua_ls()
-            require('lspconfig').lua_ls.setup(lua_opts)
-        end
-    }
+})
+
+-- Buffer-local LSP keymaps (replaces lsp-zero's default_keymaps).
+vim.api.nvim_create_autocmd('LspAttach', {
+    callback = function(event)
+        local opts = { buffer = event.buf }
+        vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+        vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, opts)
+        vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+        vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts)
+        vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, opts)
+        vim.keymap.set({ 'n', 'x' }, '<F4>', vim.lsp.buf.code_action, opts)
+    end,
 })
 
 local lspkind = require('lspkind')
