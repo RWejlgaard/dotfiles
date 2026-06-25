@@ -85,7 +85,6 @@ require('lazy').setup({
         dependencies = { 'nvim-lua/plenary.nvim' }
     },
     { 'onsails/lspkind.nvim' },              -- lsp kind, makes autocomplete look better
-    { 'hrsh7th/vim-vsnip' },
     { 'nvim-lua/plenary.nvim' },             -- lua utility functions
     {
         'nvim-telescope/telescope.nvim',
@@ -107,7 +106,7 @@ require('lazy').setup({
     },
     {                                       -- adds file bars along the top similar to vscode
         'romgrk/barbar.nvim',
-        dependencies = { 'kyazdani42/nvim-web-devicons' }
+        dependencies = { 'nvim-tree/nvim-web-devicons' }
     },
     {                                       -- adds a file explorer similar to vscode
         'nvim-tree/nvim-tree.lua',
@@ -115,7 +114,7 @@ require('lazy').setup({
     },
     {                                       -- adds diagnostics for files
         "folke/trouble.nvim",
-        dependencies = "kyazdani42/nvim-web-devicons",
+        dependencies = "nvim-tree/nvim-web-devicons",
         config = function()
             require("trouble").setup {}
         end
@@ -300,6 +299,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
 local lspkind = require('lspkind')
 lspkind.init({})
 
+-- Pull in the friendly-snippets library (vscode-format) for LuaSnip.
+require('luasnip.loaders.from_vscode').lazy_load()
+
 cmp.setup({
     formatting = {
         format = lspkind.cmp_format({
@@ -311,7 +313,7 @@ cmp.setup({
     },
     snippet = {
         expand = function(args)
-            vim.fn["vsnip#anonymous"](args.body)
+            require('luasnip').lsp_expand(args.body)
         end
     },
     window = {},
@@ -324,6 +326,7 @@ cmp.setup({
     }),
     sources = cmp.config.sources({
         { name = 'nvim_lsp' },
+        { name = 'luasnip' },
         { name = 'nvim_lua' },
         { name = 'path' },
     }, {
