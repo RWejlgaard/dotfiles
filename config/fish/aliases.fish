@@ -30,6 +30,7 @@ else if type -q batcat
 end
 alias lg=lazygit
 alias ls=eza
+alias temp="cd (mktemp -d)"
 
 alias k="kubectl"
 alias kp="kubectl get pods -A"
