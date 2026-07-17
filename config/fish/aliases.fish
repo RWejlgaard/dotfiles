@@ -28,8 +28,8 @@ else if type -q batcat
     # Debian/Ubuntu ship bat's binary as batcat to avoid a name clash
     alias cat="batcat -Pp"
 end
-alias lg=lazygit
-alias ls=eza
+alias lg="lazygit"
+alias ls="eza"
 alias temp="cd (mktemp -d)"
 
 alias k="kubectl"
