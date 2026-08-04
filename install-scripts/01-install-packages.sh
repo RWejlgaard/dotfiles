@@ -46,6 +46,10 @@ if [ -f /etc/arch-release ]; then
 
     # install packages
     sudo pacman -S --noconfirm "${PACKAGES[@]}"
+
+    # cronie provides the cron daemon + crontab, needed for the hourly
+    # pacman sync job set up in 07-last-touches.sh
+    sudo pacman -S --noconfirm cronie
 fi
 
 # if debian or ubuntu install

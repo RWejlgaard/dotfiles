@@ -113,7 +113,7 @@ The Makefile's `full-install` target runs 7 sequential scripts for a complete se
 Installs essential packages based on your OS:
 - **Common packages**: tmux, neovim, git, fish, curl, bat, go, eza, ripgrep, lazygit
 - **macOS**: Uses Homebrew (installs it first if missing)
-- **Arch Linux**: Uses pacman and installs the yay AUR helper
+- **Arch Linux**: Uses pacman, installs the yay AUR helper, and installs `cronie` (cron daemon) for the hourly pacman sync job set up in `07-last-touches.sh`
 - **Debian/Ubuntu**: Uses apt (`go` → `golang`, skips lazygit)
 - **Alpine**: Uses apk
 - **Fedora/RHEL/CentOS**: Uses dnf (skips curl and lazygit)
@@ -152,6 +152,10 @@ Completes the setup:
 - Changes the default shell to Fish
 - Creates `~/bin` for personal scripts
 - On Gentoo, installs the appropriate kernel-upgrade helper (OpenRC or systemd)
+- On Arch, enables the cron daemon and installs an hourly `sudo pacman -Syy`
+  cron job for the current user; if that user isn't root, grants them
+  passwordless sudo (`/etc/sudoers.d/99-<user>-nopasswd`) so the unattended
+  job can actually run
 
 ## Manual Setup
 
