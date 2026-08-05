@@ -37,6 +37,7 @@ if [ -f /etc/arch-release ]; then
     # install yay
     if ! command -v yay >/dev/null 2>&1 && [ "$EUID" -ne 0 ]; then
         sudo pacman -S --noconfirm base-devel
+        rm -rf yay
         git clone https://aur.archlinux.org/yay.git
         cd yay
         makepkg -si --noconfirm

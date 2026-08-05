@@ -227,18 +227,21 @@ When you submit a pull request, the following automated checks run:
   - Arch Linux
   - Fedora
   - Ubuntu
+  - macOS
 
-- **Docker-based Testing**: Each distribution test runs in a containerized environment using Docker Buildx with QEMU for cross-platform compatibility
+- **Docker-based Testing**: Each Linux distribution test runs in a containerized environment using Docker Buildx with QEMU for cross-platform compatibility
 
-- **Build Verification**: The GitHub Action (`pr-test.yml`) verifies that the dotfiles can be successfully built on each supported platform
+- **Native Testing**: macOS has no equivalent official container image, so it runs the full install directly on a hosted `macos-latest` runner instead
+
+- **Build Verification**: The GitHub Action (`pr-test.yml`) verifies that the dotfiles can be successfully built on each supported platform, and that the install actually landed (symlinks in place, fish functions loaded) — not just that the install command exited 0
 
 ### Workflow Details
 
 The PR testing workflow:
 1. Triggers on pull requests to `master` or `main` branches
-2. Uses a matrix strategy to test against multiple Linux distributions
-3. Sets up QEMU and Docker Buildx for multi-platform testing
-4. Builds the dotfiles installation in each distribution's container
+2. Uses a matrix strategy to test against multiple Linux distributions, plus a separate macOS job
+3. Sets up QEMU and Docker Buildx for multi-platform Linux testing
+4. Builds the dotfiles installation in each distribution's container, and runs the full install natively on macOS
 
 This ensures that changes don't break compatibility with any supported operating system before they're merged.
 

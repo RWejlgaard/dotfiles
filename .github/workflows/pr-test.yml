@@ -41,3 +41,22 @@ jobs:
       - name: Only build
         run: |
           docker buildx build --platform linux/amd64 --output "type=image,push=false" -f tests/Dockerfile-${{ matrix.distro }} .
+
+  test-macos:
+    # macOS has no equivalent to the Dockerfile-based distro tests above
+    # (no official macOS container images), so this runs directly on a
+    # hosted macOS runner instead.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Full install
+        run: make
+
+      # Verify the install actually landed, not just that `make` exited 0.
+      - name: Verify install
+        run: |
+          test -L ~/.config/nvim/init.lua
+          test -L ~/.config/fish/conf.d/aliases.fish
+          fish -c 'functions -q gitissue'
+          fish -c 'functions -q fisher'

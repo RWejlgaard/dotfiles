@@ -9,8 +9,11 @@ if ! grep -q "$fish_path" /etc/shells; then
 fi
 
 # change shell to fish
+# (via sudo + explicit user: plain `chsh` re-authenticates as the invoking
+# user even when they already have sudo rights, which hangs non-interactive
+# installs; root can change any user's shell without a further password)
 if ! [ "$(basename "$SHELL")" == "fish" ]; then
-    chsh -s "$fish_path"
+    sudo chsh -s "$fish_path" "$(id -un)"
 fi
 
 # create local bin directory
