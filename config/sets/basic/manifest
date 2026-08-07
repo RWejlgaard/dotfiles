@@ -1,0 +1,26 @@
+# Deployment manifest for the "basic" config set.
+# Read by install-scripts/02-move-files.sh for every enabled set.
+#
+# Format: <action> <src> <dest>
+#   src  is relative to this set's own directory.
+#   dest may use ~ for $HOME; its parent directory is created automatically.
+#
+# Actions:
+#   link       symlink src into dest, backing up any pre-existing real file
+#              to dest.bak first (so edits at dest flow back into the repo)
+#   copy       copy src to dest only if dest doesn't already exist (keeps
+#              per-machine customizations across re-runs)
+#   link-glob  symlink every file matching the src glob into the dest
+#              directory, keeping each file's basename
+#   run        execute src (relative to this set's dir) as a script; dest is
+#              unused. Should exit 0 even when it can't apply anything (e.g.
+#              wrong OS/DE) so other enabled sets still get deployed.
+
+link       vim/init.lua              ~/.config/nvim/init.lua
+link       fish/config.fish          ~/.config/fish/config.fish
+link       fish/aliases.fish         ~/.config/fish/conf.d/aliases.fish
+link       fish/functions.fish       ~/.config/fish/conf.d/functions.fish
+copy       fish/envvars.fish         ~/.config/fish/conf.d/envvars.fish
+link       tmux/tmux.conf            ~/.tmux.conf
+copy       tmux/scripts/status.conf  ~/.tmux/scripts/status.conf
+link-glob  tmux/scripts/*.sh         ~/.tmux/scripts/
