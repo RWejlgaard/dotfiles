@@ -14,12 +14,12 @@ jobs:
 
       - name: ShellCheck
         run: |
-          shellcheck install-scripts/*.sh config/tmux/scripts/*.sh scripts/*
+          shellcheck -x install-scripts/*.sh install-scripts/lib/*.sh config/sets/basic/tmux/scripts/*.sh scripts/*
 
       - name: Fish syntax check
         run: |
           sudo apt-get update && sudo apt-get install -y fish
-          for f in config/fish/*.fish install-scripts/*.fish; do
+          for f in config/sets/basic/fish/*.fish install-scripts/*.fish; do
             fish --no-execute "$f"
           done
 

@@ -1,14 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
-# Symlink tracked config files into place so edits to the live config flow
+# Deploy tracked config files into place so edits to the live config flow
 # straight back to the repo (no more "tweaked it and lost it on refresh").
-# Resolve the repo root so this works regardless of where it's invoked from.
+# Which files get deployed depends on which config "sets" are enabled for
+# this machine — see config/sets/ and `make picky`.
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=install-scripts/lib/sets.sh
+source "$REPO/install-scripts/lib/sets.sh"
 
 # Symlink SRC -> DEST, backing up any pre-existing real file to DEST.bak first.
 link() {
     local src="$1" dest="$2"
+    mkdir -p "$(dirname "$dest")"
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
         echo "Backing up existing $dest -> $dest.bak"
         mv "$dest" "$dest.bak"
@@ -16,32 +20,58 @@ link() {
     ln -sf "$src" "$dest"
 }
 
-# create directories
-mkdir -p ~/.config/nvim
-mkdir -p ~/.config/fish
-mkdir -p ~/.config/fish/conf.d
+# Copy SRC -> DEST only if DEST doesn't already exist yet, so per-machine
+# customizations (e.g. envvars.fish, status.conf) survive re-runs.
+copy_if_missing() {
+    local src="$1" dest="$2"
+    mkdir -p "$(dirname "$dest")"
+    if [ ! -f "$dest" ]; then
+        cp "$src" "$dest"
+    fi
+}
 
-# vim
-link "$REPO/config/vim/init.lua" ~/.config/nvim/init.lua
+# Deploy one config set by walking its manifest (see config/sets/*/manifest
+# for the format).
+deploy_set() {
+    local set="$1"
+    local set_dir="$SETS_DIR/$set"
+    local manifest="$set_dir/manifest"
 
-# fish
-link "$REPO/config/fish/config.fish" ~/.config/fish/config.fish
-link "$REPO/config/fish/aliases.fish" ~/.config/fish/conf.d/aliases.fish
-link "$REPO/config/fish/functions.fish" ~/.config/fish/conf.d/functions.fish
+    if [ ! -f "$manifest" ]; then
+        echo "Warning: set '$set' has no manifest, skipping." >&2
+        return
+    fi
 
-# Only copy envvars.fish if it doesn't exist.
-# This way we can override it with our own per-machine config.
-if [ ! -f ~/.config/fish/conf.d/envvars.fish ]; then
-    cp "$REPO/config/fish/envvars.fish" ~/.config/fish/conf.d/
-fi
+    echo "Deploying config set: $set"
+    while read -r action src dest; do
+        [ -z "$action" ] && continue
+        [[ "$action" == \#* ]] && continue
 
-# tmux
-link "$REPO/config/tmux/tmux.conf" ~/.tmux.conf
-mkdir -p ~/.tmux/scripts
-for script in "$REPO"/config/tmux/scripts/*.sh; do
-    link "$script" ~/.tmux/scripts/"$(basename "$script")"
-done
-# only copy status.conf if it doesn't exist, so local customizations are preserved
-if [ ! -f ~/.tmux/scripts/status.conf ]; then
-    cp "$REPO/config/tmux/scripts/status.conf" ~/.tmux/scripts/
-fi
+        dest="${dest/#\~/$HOME}"
+
+        case "$action" in
+            link)
+                link "$set_dir/$src" "$dest"
+                ;;
+            copy)
+                copy_if_missing "$set_dir/$src" "$dest"
+                ;;
+            link-glob)
+                for f in "$set_dir"/$src; do
+                    [ -e "$f" ] || continue
+                    link "$f" "$dest/$(basename "$f")"
+                done
+                ;;
+            run)
+                bash "$set_dir/$src" || echo "Warning: $src (set '$set') exited non-zero." >&2
+                ;;
+            *)
+                echo "Warning: unknown action '$action' in $manifest, skipping." >&2
+                ;;
+        esac
+    done < "$manifest"
+}
+
+while IFS= read -r set; do
+    deploy_set "$set"
+done < <(enabled_sets)

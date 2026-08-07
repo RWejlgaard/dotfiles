@@ -8,6 +8,7 @@ A comprehensive dotfiles setup for a modern development environment featuring Ne
 - **Fish Shell**: Lightweight `simple.fish` prompt, cross-machine history sync, aliases, and productivity functions
 - **Tmux**: Custom keybindings, mouse support, and a modular status bar with toggleable gadgets
 - **Cross-platform**: Supports macOS, Linux (Arch, Debian/Ubuntu, Alpine, Fedora/RHEL, Gentoo), and FreeBSD
+- **Config Sets**: Pick and choose which groups of config get deployed via an interactive `make picky` dialog
 - **Automated Setup**: One-command installation via Makefile
 
 ## Quick Install
@@ -24,27 +25,109 @@ To re-sync just the config file symlinks (without reinstalling packages or plugi
 make refresh
 ```
 
+To interactively choose which config sets get deployed, then run the full install using that selection:
+
+```bash
+make picky
+```
+
 ## Repository Layout
 
 ```
 config/
-  vim/init.lua              # Neovim configuration
-  fish/config.fish          # Fish entrypoint (greeting + $EDITOR)
-  fish/aliases.fish         # Shell aliases (deployed to conf.d/)
-  fish/functions.fish       # Shell functions (deployed to conf.d/)
-  fish/envvars.fish         # Environment variables (copied, per-machine)
-  tmux/tmux.conf            # Tmux configuration
-  tmux/scripts/status.sh    # Modular status bar renderer
-  tmux/scripts/status.conf  # Status gadget list (copied, per-machine)
-  tmux/scripts/bluetooth-menu.sh  # Bluetooth popup menu
+  sets/
+    basic/                        # The default config set (today's dotfiles)
+      description                 # One-line blurb shown by `make picky`
+      manifest                    # Declares what gets deployed and where
+      vim/init.lua                # Neovim configuration
+      fish/config.fish            # Fish entrypoint (greeting + $EDITOR)
+      fish/aliases.fish           # Shell aliases (deployed to conf.d/)
+      fish/functions.fish         # Shell functions (deployed to conf.d/)
+      fish/envvars.fish           # Environment variables (copied, per-machine)
+      tmux/tmux.conf              # Tmux configuration
+      tmux/scripts/status.sh      # Modular status bar renderer
+      tmux/scripts/status.conf    # Status gadget list (copied, per-machine)
+      tmux/scripts/bluetooth-menu.sh  # Bluetooth popup menu
+    kde/                           # KDE Plasma keyboard repeat settings
+      description
+      manifest
+      os                           # "Linux" — hidden from `make picky` elsewhere
+      apply.sh
+    macos/                         # macOS keyboard repeat settings
+      description
+      manifest
+      os                           # "Darwin" — hidden from `make picky` elsewhere
+      apply.sh
+    # further sets live alongside these, following the same layout
 install-scripts/            # Numbered setup scripts run by the Makefile
+  lib/sets.sh                # Shared helpers for discovering/enabling sets
+  pick-sets.sh               # `make picky` — the dialog checklist
 scripts/                    # Misc helper scripts (e.g. Gentoo kernel upgrade)
 tests/                      # Dockerfiles used by CI to test installs per distro
 ```
 
+## Config Sets & `make picky`
+
+Config files are grouped into **sets** under `config/sets/<name>/`:
+
+- **`basic`** — everything this repo has always deployed (Neovim, Fish, Tmux)
+- **`kde`** — sets the KDE Plasma keyboard repeat rate to 50/s with a 250ms
+  delay (via `kwriteconfig5`/`6` on `kcminputrc`)
+- **`macos`** — sets the macOS keyboard repeat rate as fast as possible with
+  the shortest delay (via `defaults write`)
+
+Each set is independent and additive — enabling `kde` or `macos` doesn't
+disturb `basic`. `kde` and `macos` each declare an `os` file restricting
+them to their platform, so `make picky` only offers `kde` on Linux and
+`macos` on macOS in the first place; if one somehow ends up enabled on the
+wrong OS anyway (e.g. a shared `sets.conf`), it's skipped with a warning
+at deploy time instead of failing.
+
+Run `make picky` to get an interactive checklist (space to toggle, enter to
+confirm) of every set found under `config/sets/`. Confirming saves your
+selection to `~/.config/dotfiles/sets.conf` and immediately kicks off the
+full install (packages, plugins, config deployment, last touches) using it
+— the same steps `make full-install` runs. Cancelling (Esc) leaves your
+existing selection untouched and stops there, without installing anything.
+The saved selection is remembered by future `make refresh` / `make
+full-install` runs too, so you only need to pick once per machine. If
+you've never run `make picky`, everything defaults to just `basic`,
+matching this repo's historical behavior.
+
+### Adding a new set
+
+1. Create `config/sets/<name>/`.
+2. Add a `manifest` file listing what to deploy, one entry per line:
+   ```
+   link       some/file           ~/.config/some/file
+   copy       some/per-machine    ~/.config/some/per-machine
+   link-glob  scripts/*.sh        ~/.local/bin/
+   run        apply.sh
+   ```
+   - `link` symlinks (so edits at the destination flow back into the repo)
+   - `copy` copies only if the destination doesn't already exist (for
+     per-machine files you don't want overwritten on re-runs)
+   - `link-glob` symlinks every file matching a glob into a destination
+     directory
+   - `run` executes a script instead of deploying a file — for settings that
+     aren't dotfiles, like the KDE/macOS keyboard repeat rate. It should
+     exit 0 even when it can't apply anything (wrong OS/DE), so other
+     enabled sets still get deployed; see `config/sets/kde/apply.sh` for an
+     example
+   - Paths are relative to the set's own directory; destinations may use `~`
+3. Optionally add a one-line `description` file — shown next to the set's
+   name in the `make picky` checklist.
+4. Optionally add an `os` file if the set only makes sense on certain
+   platforms — one `uname -s` value per line (e.g. `Darwin`, `Linux`). Sets
+   with an `os` file are hidden from `make picky` on any other OS; sets
+   without one are offered everywhere. See `config/sets/macos/os` /
+   `config/sets/kde/os` for examples.
+
 ## Config Files Overview
 
-### `config/vim/init.lua` - Neovim Configuration
+The `basic` set is deployed by default; see [Config Sets & `make picky`](#config-sets--make-picky) above for how to add or select other sets.
+
+### `config/sets/basic/vim/init.lua` - Neovim Configuration
 - **Deployed to**: `~/.config/nvim/init.lua` (symlinked)
 - **Purpose**: Complete Neovim setup with modern IDE-like features
 - **Features**:
@@ -56,14 +139,14 @@ tests/                      # Dockerfiles used by CI to test installs per distro
   - Syntax highlighting with Treesitter
   - Custom keybindings and the carbonfox colorscheme (nightfox.nvim)
 
-### `config/fish/config.fish` - Fish Shell Entrypoint
+### `config/sets/basic/fish/config.fish` - Fish Shell Entrypoint
 - **Deployed to**: `~/.config/fish/config.fish` (symlinked)
 - **Purpose**: Minimal Fish entrypoint
 - **Features**:
   - Silences the welcome greeting
   - Sets `$EDITOR` to `nvim`
 
-### `config/fish/aliases.fish` - Fish Aliases
+### `config/sets/basic/fish/aliases.fish` - Fish Aliases
 - **Deployed to**: `~/.config/fish/conf.d/aliases.fish` (symlinked)
 - **Purpose**: Command aliases loaded automatically by Fish
 - **Features**:
@@ -72,7 +155,7 @@ tests/                      # Dockerfiles used by CI to test installs per distro
   - Kubernetes shortcuts (`k`, `kp`, `kc`)
   - Gentoo and PipeWire volume helpers
 
-### `config/fish/functions.fish` - Fish Functions
+### `config/sets/basic/fish/functions.fish` - Fish Functions
 - **Deployed to**: `~/.config/fish/conf.d/functions.fish` (symlinked)
 - **Purpose**: Custom shell functions
 - **Features**:
@@ -80,12 +163,12 @@ tests/                      # Dockerfiles used by CI to test installs per distro
   - `cheat` lookup against cht.sh
   - `gitissue` helper to branch off a fresh `master`
 
-### `config/fish/envvars.fish` - Environment Variables
+### `config/sets/basic/fish/envvars.fish` - Environment Variables
 - **Deployed to**: `~/.config/fish/conf.d/envvars.fish` (copied, not symlinked)
 - **Purpose**: Per-machine environment variable definitions
 - **Note**: Only copied if it doesn't already exist, so local customizations are preserved
 
-### `config/tmux/tmux.conf` - Tmux Configuration
+### `config/sets/basic/tmux/tmux.conf` - Tmux Configuration
 - **Deployed to**: `~/.tmux.conf` (symlinked)
 - **Purpose**: Tmux terminal multiplexer configuration
 - **Features**:
@@ -97,7 +180,7 @@ tests/                      # Dockerfiles used by CI to test installs per distro
   - Bluetooth popup menu bound to `prefix + b`
   - Plugin management with TPM (tpm, tmux-better-mouse-mode)
 
-### `config/tmux/scripts/` - Tmux Status Scripts
+### `config/sets/basic/tmux/scripts/` - Tmux Status Scripts
 - **Deployed to**: `~/.tmux/scripts/` (`.sh` symlinked, `status.conf` copied)
 - **Purpose**: Render the status bar and power the Bluetooth menu
 - **Features**:
@@ -121,12 +204,13 @@ Installs essential packages based on your OS:
 - **Gentoo**: Uses emerge (`git` → `dev-vcs/git`)
 
 ### 2. File Deployment (`02-move-files.sh`)
-Symlinks configuration files to their proper locations:
-- Creates necessary directories (`~/.config/nvim`, `~/.config/fish`, `~/.tmux/scripts`, etc.)
-- Symlinks tracked config files into place, so edits to the live config flow
-  straight back to the repo
-- Copies (rather than symlinks) `envvars.fish` and `status.conf` so per-machine
-  customizations are preserved, and only if they don't already exist
+Deploys each enabled config set (`basic` by default, or whatever was chosen
+via `make picky`) by walking its `manifest`:
+- Creates any destination directories on the fly
+- Symlinks most files into place, so edits to the live config flow straight
+  back to the repo
+- Copies (rather than symlinks) per-machine files like `envvars.fish` and
+  `status.conf`, and only if they don't already exist
 
 ### 3. Fisher Installation (`03-fisher-install.fish`)
 Installs Fisher, the Fish shell plugin manager
@@ -166,20 +250,20 @@ If you prefer manual installation or want to customize the process:
    ```bash
    # Neovim
    mkdir -p ~/.config/nvim
-   ln -sf "$PWD/config/vim/init.lua" ~/.config/nvim/init.lua
+   ln -sf "$PWD/config/sets/basic/vim/init.lua" ~/.config/nvim/init.lua
 
    # Fish
    mkdir -p ~/.config/fish/conf.d
-   ln -sf "$PWD/config/fish/config.fish" ~/.config/fish/config.fish
-   ln -sf "$PWD/config/fish/aliases.fish" ~/.config/fish/conf.d/aliases.fish
-   ln -sf "$PWD/config/fish/functions.fish" ~/.config/fish/conf.d/functions.fish
-   cp "$PWD/config/fish/envvars.fish" ~/.config/fish/conf.d/
+   ln -sf "$PWD/config/sets/basic/fish/config.fish" ~/.config/fish/config.fish
+   ln -sf "$PWD/config/sets/basic/fish/aliases.fish" ~/.config/fish/conf.d/aliases.fish
+   ln -sf "$PWD/config/sets/basic/fish/functions.fish" ~/.config/fish/conf.d/functions.fish
+   cp "$PWD/config/sets/basic/fish/envvars.fish" ~/.config/fish/conf.d/
 
    # Tmux
-   ln -sf "$PWD/config/tmux/tmux.conf" ~/.tmux.conf
+   ln -sf "$PWD/config/sets/basic/tmux/tmux.conf" ~/.tmux.conf
    mkdir -p ~/.tmux/scripts
-   ln -sf "$PWD"/config/tmux/scripts/*.sh ~/.tmux/scripts/
-   cp "$PWD/config/tmux/scripts/status.conf" ~/.tmux/scripts/
+   ln -sf "$PWD"/config/sets/basic/tmux/scripts/*.sh ~/.tmux/scripts/
+   cp "$PWD/config/sets/basic/tmux/scripts/status.conf" ~/.tmux/scripts/
    ```
 3. **Run individual scripts**: Execute scripts in `install-scripts/` directory in order
 
@@ -200,10 +284,10 @@ After installation:
 ## Customization
 
 All configuration files are designed to be easily customizable:
-- **Add Fish aliases**: Edit `config/fish/aliases.fish`
-- **Add Fish functions**: Edit `config/fish/functions.fish`
-- **Modify Neovim plugins**: Edit `config/vim/init.lua`
-- **Change Tmux keybindings**: Edit `config/tmux/tmux.conf`
+- **Add Fish aliases**: Edit `config/sets/basic/fish/aliases.fish`
+- **Add Fish functions**: Edit `config/sets/basic/fish/functions.fish`
+- **Modify Neovim plugins**: Edit `config/sets/basic/vim/init.lua`
+- **Change Tmux keybindings**: Edit `config/sets/basic/tmux/tmux.conf`
 - **Toggle status bar gadgets**: Edit `~/.tmux/scripts/status.conf`
 - **Add environment variables**: Edit `~/.config/fish/conf.d/envvars.fish`
 
