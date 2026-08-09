@@ -53,7 +53,7 @@ config/
       manifest
       os                           # "Linux" — hidden from `make picky` elsewhere
       apply.sh
-    macos/                         # macOS keyboard repeat settings
+    macos/                         # macOS system settings (`defaults write`)
       description
       manifest
       os                           # "Darwin" — hidden from `make picky` elsewhere
@@ -73,8 +73,17 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
 - **`basic`** — everything this repo has always deployed (Neovim, Fish, Tmux)
 - **`kde`** — sets the KDE Plasma keyboard repeat rate to 50/s with a 250ms
   delay (via `kwriteconfig5`/`6` on `kcminputrc`)
-- **`macos`** — sets the macOS keyboard repeat rate as fast as possible with
-  the shortest delay (via `defaults write`)
+- **`macos`** — the macOS system settings that differ from stock, applied via
+  `defaults write`: fastest keyboard repeat rate with the shortest delay, all
+  automatic text substitution off, text replacements, the input-source and
+  Quick Note hotkeys disabled, dark mode, a faster trackpad, seconds in the
+  menu bar clock, no Dock recents, the built-in drag-to-edge window tiling
+  off (Rectangle handles that), Finder in list view opening on `~` with a
+  status bar, screenshots to the clipboard, personalised ads off, and — if
+  passwordless `sudo` is available — a display that never sleeps. It also
+  installs **Rectangle** and **Maccy** via Homebrew Cask and applies their
+  shortcuts (Cmd+Shift+arrows for window halves, Cmd+Shift+V for clipboard
+  history)
 
 Each set is independent and additive — enabling `kde` or `macos` doesn't
 disturb `basic`. `kde` and `macos` each declare an `os` file restricting
