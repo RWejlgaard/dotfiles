@@ -6,9 +6,9 @@ WORKDIR /workspace
 
 RUN apk add make shadow bash sudo
 
-RUN make
+RUN make basic
 
-# Verify the install actually landed, not just that `make` exited 0.
+# Verify the install actually landed, not just that `make basic` exited 0.
 RUN test -L /root/.config/nvim/init.lua \
  && test -L /root/.config/fish/conf.d/aliases.fish \
  && fish -c 'functions -q gitissue' \

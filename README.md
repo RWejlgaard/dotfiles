@@ -8,7 +8,7 @@ A comprehensive dotfiles setup for a modern development environment featuring Ne
 - **Fish Shell**: Lightweight `simple.fish` prompt, cross-machine history sync, aliases, and productivity functions
 - **Tmux**: Custom keybindings, mouse support, and a modular status bar with toggleable gadgets
 - **Cross-platform**: Supports macOS, Linux (Arch, Debian/Ubuntu, Alpine, Fedora/RHEL, Gentoo), and FreeBSD
-- **Config Sets**: Pick and choose which groups of config get deployed via an interactive `make picky` dialog
+- **Config Sets**: Pick and choose which groups of config get deployed via the interactive checklist a bare `make` opens
 - **Automated Setup**: One-command installation via Makefile
 
 ## Quick Install
@@ -17,7 +17,16 @@ A comprehensive dotfiles setup for a modern development environment featuring Ne
 make
 ```
 
-The setup will automatically detect your operating system and install all necessary packages and configurations.
+This opens an interactive checklist of the available config sets, then runs
+the full install using your selection. The setup automatically detects your
+operating system and installs all necessary packages and configurations.
+
+To install just the `basic` set without being asked anything — the right
+choice for an unattended install, and what CI runs:
+
+```bash
+make basic
+```
 
 To re-sync just the config file symlinks (without reinstalling packages or plugins):
 
@@ -25,10 +34,11 @@ To re-sync just the config file symlinks (without reinstalling packages or plugi
 make refresh
 ```
 
-To interactively choose which config sets get deployed, then run the full install using that selection:
+To re-run the full install using the sets you already picked, without the
+checklist:
 
 ```bash
-make picky
+make full-install
 ```
 
 ## Repository Layout
@@ -61,7 +71,7 @@ config/
     # further sets live alongside these, following the same layout
 install-scripts/            # Numbered setup scripts run by the Makefile
   lib/sets.sh                # Shared helpers for discovering/enabling sets
-  pick-sets.sh               # `make picky` — the dialog checklist
+  pick-sets.sh               # the dialog checklist; takes set names to skip it
 scripts/                    # Misc helper scripts (e.g. Gentoo kernel upgrade)
 tests/                      # Dockerfiles used by CI to test installs per distro
 ```
@@ -92,16 +102,23 @@ them to their platform, so `make picky` only offers `kde` on Linux and
 wrong OS anyway (e.g. a shared `sets.conf`), it's skipped with a warning
 at deploy time instead of failing.
 
-Run `make picky` to get an interactive checklist (space to toggle, enter to
-confirm) of every set found under `config/sets/`. Confirming saves your
-selection to `~/.config/dotfiles/sets.conf` and immediately kicks off the
-full install (packages, plugins, config deployment, last touches) using it
-— the same steps `make full-install` runs. Cancelling (Esc) leaves your
-existing selection untouched and stops there, without installing anything.
+A bare `make` (or `make picky`, the same target by name) gives you an
+interactive checklist (space to toggle, enter to confirm) of every set found
+under `config/sets/`. Confirming saves your selection to
+`~/.config/dotfiles/sets.conf` and immediately kicks off the full install
+(packages, plugins, config deployment, last touches) using it — the same
+steps `make full-install` runs. Cancelling (Esc) leaves your existing
+selection untouched and stops there, without installing anything.
+
+`make basic` is the non-interactive equivalent: it enables just the `basic`
+set and installs, skipping the checklist entirely (and skipping the `dialog`
+dependency the checklist would otherwise pull in). CI uses it, and so should
+any unattended install.
+
 The saved selection is remembered by future `make refresh` / `make
-full-install` runs too, so you only need to pick once per machine. If
-you've never run `make picky`, everything defaults to just `basic`,
-matching this repo's historical behavior.
+full-install` runs too, so you only need to pick once per machine. If you've
+never picked, everything defaults to just `basic`, matching this repo's
+historical behavior.
 
 ### Adding a new set
 
