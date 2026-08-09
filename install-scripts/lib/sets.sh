@@ -46,6 +46,11 @@ enabled_sets() {
         sets=("basic")
     fi
 
+    # Expanding an empty array trips `set -u` on bash 3.2 (which is what
+    # macOS ships), and an empty sets.conf -- every set deselected -- is a
+    # legitimate state.
+    [ "${#sets[@]}" -eq 0 ] && return 0
+
     for set in "${sets[@]}"; do
         if [ ! -d "$SETS_DIR/$set" ]; then
             echo "Warning: enabled set '$set' no longer exists in the repo, skipping." >&2
