@@ -59,3 +59,17 @@ if command -v plasma-apply-lookandfeel >/dev/null 2>&1; then
 else
     "$kwriteconfig" --file kdeglobals --group KDE --key LookAndFeelPackage org.kde.breezedark.desktop
 fi
+
+# Add Rectangle-style (macOS) window tiling shortcuts, swapping Cmd for Alt:
+# Shift+Alt+Left/Right/Up/Down for left/right half, maximize, and minimize.
+# Added alongside the existing Meta-based defaults rather than replacing them
+# (System Settings > Shortcuts > Window Management).
+# Takes effect after logging back into Plasma.
+"$kwriteconfig" --file kglobalshortcutsrc --group kwin --key "Window Quick Tile Left" \
+    $'Meta+Left\tAlt+Shift+Left,Meta+Left,Quick Tile Window to the Left'
+"$kwriteconfig" --file kglobalshortcutsrc --group kwin --key "Window Quick Tile Right" \
+    $'Meta+Right\tAlt+Shift+Right,Meta+Right,Quick Tile Window to the Right'
+"$kwriteconfig" --file kglobalshortcutsrc --group kwin --key "Window Maximize" \
+    $'Meta+PgUp\tAlt+Shift+Up,Meta+PgUp,Maximize Window'
+"$kwriteconfig" --file kglobalshortcutsrc --group kwin --key "Window Minimize" \
+    $'Meta+PgDown\tAlt+Shift+Down,Meta+PgDown,Minimize Window'
