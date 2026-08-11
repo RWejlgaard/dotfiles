@@ -1,18 +1,46 @@
 #!/bin/bash
 set -euo pipefail
 
-# `make picky`: an interactive dialog checklist for choosing which config
-# sets (config/sets/<name>/) get deployed to this machine. The selection is
-# remembered in $SETS_STATE_FILE so future `make refresh` / `make
-# full-install` runs keep using it without asking again — re-run `make
-# picky` any time to change your mind.
+# Chooses which config sets (config/sets/<name>/) get deployed to this
+# machine, and remembers the choice in $SETS_STATE_FILE so future `make
+# refresh` / `make full-install` runs keep using it without asking again.
 #
-# On confirm, the Makefile's `picky` target runs the full install right
-# after this script exits successfully. Exiting non-zero (e.g. on cancel)
-# stops `make` before that happens.
+# With no arguments (a bare `make`, or `make picky`) it shows an interactive
+# dialog checklist. With set names as arguments it enables exactly those,
+# non-interactively — that's how `make basic` skips the dialog.
+#
+# Either way the Makefile runs the full install right after this script
+# exits successfully. Exiting non-zero (e.g. on cancel) stops `make` before
+# that happens.
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=install-scripts/lib/sets.sh
 source "$REPO/install-scripts/lib/sets.sh"
+
+# Persist the given set names as this machine's selection.
+save_sets() {
+    mkdir -p "$(dirname "$SETS_STATE_FILE")"
+    printf '%s\n' "$@" | sed '/^$/d' > "$SETS_STATE_FILE"
+
+    if [ -s "$SETS_STATE_FILE" ]; then
+        echo "Enabled sets: $(paste -sd, "$SETS_STATE_FILE")"
+    else
+        echo "Enabled sets: (none)"
+    fi
+}
+
+# Non-interactive path: enable exactly the named sets and skip the dialog
+# (and skip installing `dialog` in the first place).
+if [ "$#" -gt 0 ]; then
+    for set in "$@"; do
+        if [ ! -d "$SETS_DIR/$set" ]; then
+            echo "No config set named '$set' under config/sets/." >&2
+            echo "Available: $(list_available_sets | paste -sd, -)" >&2
+            exit 1
+        fi
+    done
+    save_sets "$@"
+    exit 0
+fi
 
 ensure_dialog() {
     command -v dialog >/dev/null 2>&1 && return
@@ -40,19 +68,32 @@ ensure_dialog() {
 
 ensure_dialog
 
-mapfile -t available < <(list_pickable_sets)
+# Collected with read loops rather than `mapfile -t`: macOS still ships bash
+# 3.2, which predates that builtin.
+available=()
+while IFS= read -r line; do
+    available+=("$line")
+done < <(list_pickable_sets)
+
 if [ "${#available[@]}" -eq 0 ]; then
     echo "No config sets found under config/sets/ that apply to this OS." >&2
     exit 1
 fi
 
-mapfile -t currently_enabled < <(enabled_sets)
+currently_enabled=()
+while IFS= read -r line; do
+    currently_enabled+=("$line")
+done < <(enabled_sets)
 
 is_enabled() {
-    local set="$1"
-    for enabled in "${currently_enabled[@]}"; do
-        [ "$set" == "$enabled" ] && return 0
-    done
+    local set="$1" enabled
+    # Expanding an empty array trips `set -u` on bash 3.2, so check first —
+    # deselecting every set is a legitimate state.
+    if [ "${#currently_enabled[@]}" -gt 0 ]; then
+        for enabled in "${currently_enabled[@]}"; do
+            [ "$set" == "$enabled" ] && return 0
+        done
+    fi
     return 1
 }
 
@@ -84,11 +125,4 @@ if [ "$status" -ne 0 ]; then
     exit 1
 fi
 
-mkdir -p "$(dirname "$SETS_STATE_FILE")"
-printf '%s\n' "$selection" | sed '/^$/d' > "$SETS_STATE_FILE"
-
-if [ -s "$SETS_STATE_FILE" ]; then
-    echo "Enabled sets: $(paste -sd, "$SETS_STATE_FILE")"
-else
-    echo "Enabled sets: (none)"
-fi
+save_sets "$selection"
