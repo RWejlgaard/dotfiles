@@ -68,6 +68,11 @@ config/
       manifest
       os                           # "Darwin" — hidden from `make picky` elsewhere
       apply.sh
+    xfce/                          # XFCE settings (`xfconf-query`), panel layout, Kitty
+      description
+      manifest
+      os                           # "Linux" — hidden from `make picky` elsewhere
+      apply.sh
     # further sets live alongside these, following the same layout
 install-scripts/            # Numbered setup scripts run by the Makefile
   lib/sets.sh                # Shared helpers for discovering/enabling sets
@@ -94,13 +99,21 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   installs **Rectangle** and **Maccy** via Homebrew Cask and applies their
   shortcuts (Cmd+Shift+arrows for window halves, Cmd+Shift+V for clipboard
   history)
+- **`xfce`** — the XFCE settings that differ from stock, applied via
+  `xfconf-query`: the same keyboard repeat rate and Caps Lock as Escape as
+  `kde`/`gnome`, screen locking and idle display dim/off disabled, device
+  automounting disabled, an editable path bar in Thunar and GTK file
+  dialogs, a dark theme (whichever of a few common ones is actually
+  installed), and the default panel layout collapsed down to a single
+  panel docked to the bottom of the screen. It also installs and
+  configures **Kitty** as the default terminal
 
 Each set is independent and additive — enabling `kde` or `macos` doesn't
-disturb `basic`. `kde` and `macos` each declare an `os` file restricting
-them to their platform, so `make picky` only offers `kde` on Linux and
-`macos` on macOS in the first place; if one somehow ends up enabled on the
-wrong OS anyway (e.g. a shared `sets.conf`), it's skipped with a warning
-at deploy time instead of failing.
+disturb `basic`. `kde`, `macos` and `xfce` each declare an `os` file
+restricting them to their platform, so `make picky` only offers `kde` and
+`xfce` on Linux and `macos` on macOS in the first place; if one somehow ends
+up enabled on the wrong OS anyway (e.g. a shared `sets.conf`), it's skipped
+with a warning at deploy time instead of failing.
 
 A bare `make` (or `make picky`, the same target by name) gives you an
 interactive checklist (space to toggle, enter to confirm) of every set found

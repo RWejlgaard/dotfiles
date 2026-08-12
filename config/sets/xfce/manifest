@@ -1,0 +1,3 @@
+# See config/sets/basic/manifest for the full manifest format reference.
+
+run  apply.sh
