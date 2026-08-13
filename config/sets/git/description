@@ -1,0 +1,4 @@
+Git: aliases (st/co/br/ci/last/unstage/amend), sane defaults (autoprune on
+fetch, autoSetupRemote on push, rerere, diff3 conflict markers), a global
+gitignore, a per-machine identity file, plus Delta installed and wired in
+as the diff/log pager

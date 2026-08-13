@@ -1,0 +1,38 @@
+# ~/.config/git/identity holds per-machine user.name/user.email (deployed
+# once, then left alone). ~/.config/git/local holds settings apply.sh writes
+# imperatively (e.g. Delta wiring, only if it installed successfully) — it's
+# not tracked by this repo, and missing either file here is a silent no-op.
+[include]
+	path = ~/.config/git/identity
+	path = ~/.config/git/local
+
+[core]
+	editor = nvim
+	excludesfile = ~/.config/git/ignore
+
+[init]
+	defaultBranch = main
+
+[color]
+	ui = auto
+
+[fetch]
+	prune = true
+
+[push]
+	autoSetupRemote = true
+
+[merge]
+	conflictStyle = diff3
+
+[rerere]
+	enabled = true
+
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	last = log -1 HEAD
+	unstage = reset HEAD --
+	amend = commit --amend --no-edit
