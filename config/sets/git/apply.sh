@@ -43,6 +43,16 @@ if install_delta && command -v delta >/dev/null 2>&1; then
     git config --file "$GIT_LOCAL_CONFIG" core.pager "delta"
     git config --file "$GIT_LOCAL_CONFIG" interactive.diffFilter "delta --color-only"
     git config --file "$GIT_LOCAL_CONFIG" delta.navigate true
+
+    # Line numbers, off by default. Also overrides delta's default
+    # file-style and line-numbers-{left,right}-style, both plain ANSI
+    # "blue" — poor contrast on a dark background (`delta --show-config`
+    # shows every other default style resolved to a specific RGB/256-color
+    # value; these two are the only ones left at a raw, unadjusted ANSI name).
+    git config --file "$GIT_LOCAL_CONFIG" delta.line-numbers true
+    git config --file "$GIT_LOCAL_CONFIG" delta.file-style "bold yellow ul"
+    git config --file "$GIT_LOCAL_CONFIG" delta.line-numbers-left-style "white"
+    git config --file "$GIT_LOCAL_CONFIG" delta.line-numbers-right-style "white"
 else
     echo "Warning: delta not available; leaving git's default pager in place." >&2
 fi
