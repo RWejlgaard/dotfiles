@@ -1,0 +1,6 @@
+# See config/sets/basic/manifest for the full manifest format reference.
+
+link  gitconfig  ~/.config/git/config
+link  gitignore  ~/.config/git/ignore
+copy  identity   ~/.config/git/identity
+run   apply.sh

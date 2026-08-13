@@ -58,6 +58,13 @@ config/
       tmux/scripts/status.sh      # Modular status bar renderer
       tmux/scripts/status.conf    # Status gadget list (copied, per-machine)
       tmux/scripts/bluetooth-menu.sh  # Bluetooth popup menu
+    git/                           # Git config, aliases, global gitignore, Delta
+      description
+      manifest
+      gitconfig                    # Linked to ~/.config/git/config
+      gitignore                    # Linked to ~/.config/git/ignore
+      identity                     # Copied to ~/.config/git/identity, per-machine
+      apply.sh
     kde/                           # KDE Plasma keyboard repeat settings
       description
       manifest
@@ -86,6 +93,15 @@ tests/                      # Dockerfiles used by CI to test installs per distro
 Config files are grouped into **sets** under `config/sets/<name>/`:
 
 - **`basic`** — everything this repo has always deployed (Neovim, Fish, Tmux)
+- **`git`** — aliases (`st`/`co`/`br`/`ci`/`last`/`unstage`/`amend`), sane
+  defaults (autoprune on fetch, `autoSetupRemote` on push, rerere, `diff3`
+  conflict markers), a global gitignore, and a per-machine identity file
+  (`~/.config/git/identity`, copied once so different machines can carry
+  different `user.name`/`user.email`). It also installs **Delta** and wires
+  it in as the diff/log pager — written to a separate, untracked
+  `~/.config/git/local` file rather than `git config --global`, since with
+  no `~/.gitconfig` yet that resolves to the tracked `~/.config/git/config`
+  symlink
 - **`kde`** — sets the KDE Plasma keyboard repeat rate to 50/s with a 250ms
   delay (via `kwriteconfig5`/`6` on `kcminputrc`)
 - **`macos`** — the macOS system settings that differ from stock, applied via
