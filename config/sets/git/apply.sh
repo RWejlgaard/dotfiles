@@ -53,6 +53,23 @@ if install_delta && command -v delta >/dev/null 2>&1; then
     git config --file "$GIT_LOCAL_CONFIG" delta.file-style "bold yellow ul"
     git config --file "$GIT_LOCAL_CONFIG" delta.line-numbers-left-style "white"
     git config --file "$GIT_LOCAL_CONFIG" delta.line-numbers-right-style "white"
+
+    # lazygit (installed unconditionally by config/sets/basic) renders diffs
+    # with its own plain built-in view unless told otherwise. delta itself
+    # already reads the [delta] settings above regardless of caller, so this
+    # only needs the two lazygit-specific flags: --paging=never (delta would
+    # otherwise try to page inside lazygit's own pager pane) and --dark.
+    # Deployed like ~/.config/git/identity — only if missing, so hand edits
+    # (or other diffRenderers entries) survive re-runs.
+    mkdir -p ~/.config/lazygit
+    lazygit_config=~/.config/lazygit/config.yml
+    if [ ! -f "$lazygit_config" ]; then
+        cat > "$lazygit_config" <<'EOF'
+git:
+  diffRenderers:
+    - command: delta --dark --paging=never
+EOF
+    fi
 else
     echo "Warning: delta not available; leaving git's default pager in place." >&2
 fi

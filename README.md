@@ -98,10 +98,13 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   conflict markers), a global gitignore, and a per-machine identity file
   (`~/.config/git/identity`, copied once so different machines can carry
   different `user.name`/`user.email`). It also installs **Delta** and wires
-  it in as the diff/log pager — written to a separate, untracked
-  `~/.config/git/local` file rather than `git config --global`, since with
-  no `~/.gitconfig` yet that resolves to the tracked `~/.config/git/config`
-  symlink
+  it in as the diff/log pager, with line numbers on and higher-contrast
+  colors than its low-contrast-blue defaults — written to a separate,
+  untracked `~/.config/git/local` file rather than `git config --global`,
+  since with no `~/.gitconfig` yet that resolves to the tracked
+  `~/.config/git/config` symlink. lazygit (installed unconditionally by
+  `basic`) gets pointed at Delta too, via a `~/.config/lazygit/config.yml`
+  deployed the same copy-once way as the identity file
 - **`kde`** — sets the KDE Plasma keyboard repeat rate to 50/s with a 250ms
   delay (via `kwriteconfig5`/`6` on `kcminputrc`)
 - **`macos`** — the macOS system settings that differ from stock, applied via
