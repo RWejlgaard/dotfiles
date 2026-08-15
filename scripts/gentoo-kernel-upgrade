@@ -20,6 +20,14 @@ NC='\033[0m' # No Color
 EFI_DIR="/boot/efi"
 BOOT_DIR="/boot"
 
+# Gentoo's installkernel names the kernel image in /boot differently
+# depending on the layout it was configured for: the traditional one uses
+# vmlinuz-<version>, the systemd/UAPI one uses kernel-<version>. That naming
+# was the *only* difference between the two copies of this script this file
+# replaces, so it's detected at runtime instead. Set KERNEL_PREFIX to
+# override.
+KERNEL_PREFIX="${KERNEL_PREFIX:-}"
+
 # Print functions
 info()    { echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"; }
 warn()    { echo -e "${YELLOW}WARNING:${NC} $1"; }
@@ -46,6 +54,44 @@ confirm() {
 # Get the currently running kernel version
 get_current_version() {
     uname -r
+}
+
+# Work out whether this system's kernel images are named vmlinuz-<version>
+# or kernel-<version>, and set KERNEL_PREFIX accordingly.
+detect_kernel_prefix() {
+    # An explicit KERNEL_PREFIX from the environment always wins.
+    if [[ -n "$KERNEL_PREFIX" ]]; then
+        return 0
+    fi
+
+    local running prefix
+    running=$(get_current_version)
+
+    # Strongest signal: whichever name the *running* kernel is installed
+    # under, since that's the one this system's installkernel actually used.
+    for prefix in vmlinuz kernel; do
+        if [[ -f "${BOOT_DIR}/${prefix}-${running}" ]]; then
+            KERNEL_PREFIX="$prefix"
+            return 0
+        fi
+    done
+
+    # Next best: whichever name anything else in /boot uses (the running
+    # kernel may already have been cleaned up, or /boot only just mounted).
+    for prefix in vmlinuz kernel; do
+        if ls "${BOOT_DIR}/${prefix}"-* >/dev/null 2>&1; then
+            KERNEL_PREFIX="$prefix"
+            return 0
+        fi
+    done
+
+    # Nothing in /boot to go on. Fall back to the init system, which is what
+    # the layout was chosen for in the first place.
+    if [[ -d /run/systemd/system ]]; then
+        KERNEL_PREFIX="kernel"
+    else
+        KERNEL_PREFIX="vmlinuz"
+    fi
 }
 
 # Get the latest installed kernel version from /usr/src
@@ -185,7 +231,7 @@ generate_initramfs() {
 # Copy new kernel to EFI partition
 copy_kernel() {
     local version="$1"
-    local kernel_source="${BOOT_DIR}/vmlinuz-${version}"
+    local kernel_source="${BOOT_DIR}/${KERNEL_PREFIX}-${version}"
 
     info "Copying new kernel to EFI partition..."
     echo
@@ -219,15 +265,13 @@ cleanup_old_versions() {
     local initramfs_to_delete=()
     local kernels_to_delete=()
 
-    
-
     while IFS= read -r f; do
         initramfs_to_delete+=("$f")
     done < <(ls ${BOOT_DIR}/initramfs-*.img 2>/dev/null | grep -v "$current_version" || true)
 
     while IFS= read -r f; do
         kernels_to_delete+=("$f")
-    done < <(ls ${BOOT_DIR}/vmlinuz-* 2>/dev/null | grep -v "$current_version" || true)
+    done < <(ls ${BOOT_DIR}/"${KERNEL_PREFIX}"-* 2>/dev/null | grep -v "$current_version" || true)
 
     # Check if there's anything to delete
     if [[ ${#initramfs_to_delete[@]} -eq 0 ]] && [[ ${#kernels_to_delete[@]} -eq 0 ]]; then
@@ -298,6 +342,9 @@ main() {
     local current_version
     current_version=$(get_current_version)
     info "Currently running kernel: ${current_version}"
+
+    detect_kernel_prefix
+    info "Kernel images in ${BOOT_DIR} are named: ${KERNEL_PREFIX}-<version>"
     echo
 
     # Check for updates

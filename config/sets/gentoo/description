@@ -1,0 +1,4 @@
+Gentoo: the gentoo-kernel-upgrade helper installed to /usr/bin — a guided,
+confirm-every-step walkthrough of a gentoo-kernel-bin upgrade (emerge, eselect
+kernel, back up the EFI boot files, regenerate the initramfs, copy the new
+image across) plus cleanup of superseded kernels in /boot

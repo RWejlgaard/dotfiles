@@ -65,7 +65,17 @@ config/
       gitignore                    # Linked to ~/.config/git/ignore
       identity                     # Copied to ~/.config/git/identity, per-machine
       apply.sh
-    kde/                           # KDE Plasma keyboard repeat settings
+    gentoo/                        # The gentoo-kernel-upgrade helper
+      description
+      manifest
+      os                           # "Linux" — hidden from `make picky` elsewhere
+      apply.sh
+    gnome/                         # GNOME settings (`gsettings`)
+      description
+      manifest
+      os                           # "Linux" — hidden from `make picky` elsewhere
+      apply.sh
+    kde/                           # KDE Plasma settings (`kwriteconfig5`/`6`)
       description
       manifest
       os                           # "Linux" — hidden from `make picky` elsewhere
@@ -102,8 +112,22 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   `~/.config/git/local` file rather than `git config --global`, since with
   no `~/.gitconfig` yet that resolves to the tracked `~/.config/git/config`
   symlink
-- **`kde`** — sets the KDE Plasma keyboard repeat rate to 50/s with a 250ms
-  delay (via `kwriteconfig5`/`6` on `kcminputrc`)
+- **`gentoo`** — installs `scripts/gentoo-kernel-upgrade` into `/usr/bin`: a
+  guided, confirm-every-step walkthrough of a `gentoo-kernel-bin` upgrade
+  (emerge, `eselect kernel`, back up the EFI boot files, regenerate the
+  initramfs, copy the new image across), plus a cleanup pass over superseded
+  kernels in `/boot`. It works out on its own whether this system's kernel
+  images are named `vmlinuz-<version>` or `kernel-<version>`; set
+  `KERNEL_PREFIX` to override that
+- **`gnome`** — the GNOME settings that differ from stock, applied via
+  `gsettings`: keyboard repeat rate 50/s with a 250ms delay, Caps Lock as
+  Escape, screen locking and idle display dim/off disabled, device
+  automounting disabled, an editable path bar in GTK file dialogs, and a
+  dark color scheme
+- **`kde`** — the KDE Plasma equivalents, applied via `kwriteconfig5`/`6`:
+  the same keyboard repeat rate and Caps Lock as Escape, screen locking and
+  idle display dim/off disabled, the device automounter disabled, Dolphin's
+  menu bar hidden with an editable path bar, and the Breeze Dark theme
 - **`macos`** — the macOS system settings that differ from stock, applied via
   `defaults write`: fastest keyboard repeat rate with the shortest delay, all
   automatic text substitution off, text replacements, the input-source and
@@ -125,11 +149,17 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   configures **Kitty** as the default terminal
 
 Each set is independent and additive — enabling `kde` or `macos` doesn't
-disturb `basic`. `kde`, `macos` and `xfce` each declare an `os` file
-restricting them to their platform, so `make picky` only offers `kde` and
-`xfce` on Linux and `macos` on macOS in the first place; if one somehow ends
-up enabled on the wrong OS anyway (e.g. a shared `sets.conf`), it's skipped
-with a warning at deploy time instead of failing.
+disturb `basic`. Every set except `basic` and `git` declares an `os` file
+restricting it to its platform, so `make picky` only offers `gentoo`,
+`gnome`, `kde` and `xfce` on Linux and `macos` on macOS in the first place;
+if one somehow ends up enabled on the wrong OS anyway (e.g. a shared
+`sets.conf`), it's skipped with a warning at deploy time instead of failing.
+
+An `os` file is only as specific as `uname -s`, so the Linux sets are offered
+on *every* Linux. Each one checks for what it actually needs at deploy time —
+`gsettings`, `kwriteconfig`, `xfconf-query`, `/etc/gentoo-release` — and
+warns and exits 0 if it isn't there, so picking `gentoo` on Debian is
+harmless rather than fatal.
 
 A bare `make` (or `make picky`, the same target by name) gives you an
 interactive checklist (space to toggle, enter to confirm) of every set found
@@ -290,7 +320,6 @@ Completes the setup:
 - Adds Fish to `/etc/shells`
 - Changes the default shell to Fish
 - Creates `~/bin` for personal scripts
-- On Gentoo, installs the appropriate kernel-upgrade helper (OpenRC or systemd)
 - On Arch, enables the cron daemon and installs an hourly `sudo pacman -Syy`
   cron job for the current user; if that user isn't root, grants them
   passwordless sudo (`/etc/sudoers.d/99-<user>-nopasswd`) so the unattended
