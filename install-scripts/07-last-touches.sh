@@ -19,19 +19,11 @@ fi
 # create local bin directory
 mkdir -p ~/bin
 
-# Gentoo specific kernel script
+# Gentoo specific kernel script. It works out for itself whether this
+# system's kernel images are named vmlinuz-<version> or kernel-<version>, so
+# there's nothing to ask about here.
 if [ -f /etc/gentoo-release ]; then
-    init_system=openrc
-    echo "Gentoo detected, need clarification on which init system is used."
-    echo -e "Which init system?\n\n1> openrc\n2> systemd"
-    read -p "[1]/2: " -n 1;
-    echo
-    if [ "$REPLY" == "2" ]; then
-        init_system=systemd
-    fi
-
-    sudo cp scripts/gentoo-kernel-upgrade-$init_system /usr/bin/gentoo-kernel-upgrade
-
+    sudo cp scripts/gentoo-kernel-upgrade /usr/bin/gentoo-kernel-upgrade
 fi
 
 # Arch specific: keep the local package database fresh via an hourly cron job

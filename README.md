@@ -290,7 +290,7 @@ Completes the setup:
 - Adds Fish to `/etc/shells`
 - Changes the default shell to Fish
 - Creates `~/bin` for personal scripts
-- On Gentoo, installs the appropriate kernel-upgrade helper (OpenRC or systemd)
+- On Gentoo, installs the `gentoo-kernel-upgrade` helper into `/usr/bin`
 - On Arch, enables the cron daemon and installs an hourly `sudo pacman -Syy`
   cron job for the current user; if that user isn't root, grants them
   passwordless sudo (`/etc/sudoers.d/99-<user>-nopasswd`) so the unattended
