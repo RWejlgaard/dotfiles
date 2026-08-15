@@ -19,12 +19,8 @@ fi
 # create local bin directory
 mkdir -p ~/bin
 
-# Gentoo specific kernel script. It works out for itself whether this
-# system's kernel images are named vmlinuz-<version> or kernel-<version>, so
-# there's nothing to ask about here.
-if [ -f /etc/gentoo-release ]; then
-    sudo cp scripts/gentoo-kernel-upgrade /usr/bin/gentoo-kernel-upgrade
-fi
+# (The Gentoo kernel-upgrade helper used to be installed here, unconditionally
+# on every Gentoo box. It's an opt-in config set now — config/sets/gentoo/.)
 
 # Arch specific: keep the local package database fresh via an hourly cron job
 if [ -f /etc/arch-release ]; then
