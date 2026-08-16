@@ -14,7 +14,7 @@ jobs:
 
       - name: ShellCheck
         run: |
-          shellcheck -x install-scripts/*.sh install-scripts/lib/*.sh config/sets/basic/tmux/scripts/*.sh scripts/*
+          shellcheck -x install-scripts/*.sh install-scripts/lib/*.sh config/sets/*/apply.sh config/sets/basic/tmux/scripts/*.sh scripts/*
 
       - name: Fish syntax check
         run: |

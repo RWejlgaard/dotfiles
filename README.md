@@ -65,7 +65,17 @@ config/
       gitignore                    # Linked to ~/.config/git/ignore
       identity                     # Copied to ~/.config/git/identity, per-machine
       apply.sh
-    kde/                           # KDE Plasma keyboard repeat settings
+    gentoo/                        # The gentoo-kernel-upgrade helper
+      description
+      manifest
+      os                           # "Linux" — hidden from `make picky` elsewhere
+      apply.sh
+    gnome/                         # GNOME settings (`gsettings`)
+      description
+      manifest
+      os                           # "Linux" — hidden from `make picky` elsewhere
+      apply.sh
+    kde/                           # KDE Plasma settings (`kwriteconfig5`/`6`)
       description
       manifest
       os                           # "Linux" — hidden from `make picky` elsewhere
@@ -128,11 +138,17 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   configures **Kitty** as the default terminal
 
 Each set is independent and additive — enabling `kde` or `macos` doesn't
-disturb `basic`. `kde`, `macos` and `xfce` each declare an `os` file
-restricting them to their platform, so `make picky` only offers `kde` and
-`xfce` on Linux and `macos` on macOS in the first place; if one somehow ends
-up enabled on the wrong OS anyway (e.g. a shared `sets.conf`), it's skipped
-with a warning at deploy time instead of failing.
+disturb `basic`. Every set except `basic` and `git` declares an `os` file
+restricting it to its platform, so `make picky` only offers `gentoo`,
+`gnome`, `kde` and `xfce` on Linux and `macos` on macOS in the first place;
+if one somehow ends up enabled on the wrong OS anyway (e.g. a shared
+`sets.conf`), it's skipped with a warning at deploy time instead of failing.
+
+An `os` file is only as specific as `uname -s`, so the Linux sets are offered
+on *every* Linux. Each one checks for what it actually needs at deploy time —
+`gsettings`, `kwriteconfig`, `xfconf-query`, `/etc/gentoo-release` — and
+warns and exits 0 if it isn't there, so picking `gentoo` on Debian is
+harmless rather than fatal.
 
 A bare `make` (or `make picky`, the same target by name) gives you an
 interactive checklist (space to toggle, enter to confirm) of every set found
@@ -293,7 +309,6 @@ Completes the setup:
 - Adds Fish to `/etc/shells`
 - Changes the default shell to Fish
 - Creates `~/bin` for personal scripts
-- On Gentoo, installs the appropriate kernel-upgrade helper (OpenRC or systemd)
 - On Arch, enables the cron daemon and installs an hourly `sudo pacman -Syy`
   cron job for the current user; if that user isn't root, grants them
   passwordless sudo (`/etc/sudoers.d/99-<user>-nopasswd`) so the unattended
