@@ -5,6 +5,14 @@ set -euo pipefail
 # config/sets/kde/apply.sh and config/sets/gnome/apply.sh's choices for the
 # XFCE desktop.
 # Each section below is independent and safe to re-run.
+#
+# The "# intent:" markers below tie each section to an entry in
+# config/desktop-common.sh, which is the one place the kde/gnome/xfce sets
+# agree on what they're all supposed to cover.
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+# shellcheck source=config/desktop-common.sh
+source "$REPO/config/desktop-common.sh"
 
 if ! command -v xfconf-query >/dev/null 2>&1; then
     echo "Warning: xfconf-query not found (not an XFCE system?); skipping XFCE settings." >&2
@@ -23,19 +31,20 @@ xset_prop() {
 
 # --- Keyboard ---------------------------------------------------------
 
-# Keyboard repeat rate: 50 repeats/sec with a 250ms initial delay
-# (Settings > Keyboard > Behaviour).
+# intent: keyboard-repeat
+# Settings > Keyboard > Behaviour.
 xset_prop keyboards /Default/KeyRepeat bool true
-xset_prop keyboards /Default/KeyRepeat/Rate int 50
-xset_prop keyboards /Default/KeyRepeat/Delay int 250
+xset_prop keyboards /Default/KeyRepeat/Rate int "$KEY_REPEAT_RATE"
+xset_prop keyboards /Default/KeyRepeat/Delay int "$KEY_REPEAT_DELAY_MS"
 
 # Apply immediately in the current X11 session; a fresh login also
 # re-applies it from the "keyboards" channel either way.
 if [ -n "${DISPLAY:-}" ] && command -v xset >/dev/null 2>&1; then
-    xset r rate 250 50 || true
+    xset r rate "$KEY_REPEAT_DELAY_MS" "$KEY_REPEAT_RATE" || true
 fi
 
-# Remap Caps Lock to Escape. Unlike the layout/group/compose-key options,
+# intent: caps-as-escape
+# Unlike the layout/group/compose-key options,
 # xfsettingsd has no xfconf-backed setting for this XKB option group, so it
 # can't be stored declaratively the way the kde/gnome sets do it — it's
 # applied directly via setxkbmap instead, both now and on every future
@@ -57,7 +66,8 @@ fi
 
 # --- Screen locking & power --------------------------------------------
 
-# Disable screen locking entirely (Settings > Screensaver). xfce4-screensaver
+# intent: no-screen-lock
+# Settings > Screensaver. xfce4-screensaver
 # is a separate, optional package (older XFCE releases use light-locker
 # instead, which has no xfconf-backed settings of its own).
 if command -v xfce4-screensaver >/dev/null 2>&1; then
@@ -67,6 +77,7 @@ else
     echo "Warning: xfce4-screensaver not found; skipping screen lock settings." >&2
 fi
 
+# intent: no-idle-display
 # Never dim or turn off the display when idle, on AC or battery, and don't
 # lock on suspend/hibernate (Settings > Power Manager).
 if command -v xfce4-power-manager >/dev/null 2>&1; then
@@ -80,9 +91,9 @@ fi
 
 # --- Device automount ----------------------------------------------------
 
-# Disable automounting of removable devices (Settings > Removable Drives
-# and Media). thunar-volman is a separate, optional package from Thunar
-# itself.
+# intent: no-automount
+# Settings > Removable Drives and Media. thunar-volman is a separate,
+# optional package from Thunar itself.
 if command -v thunar-volman >/dev/null 2>&1; then
     xset_prop thunar-volman /autobrowse/enabled bool false
     xset_prop thunar-volman /automount-drives/enabled bool false
@@ -94,6 +105,7 @@ fi
 
 # --- File manager / dialogs ----------------------------------------------
 
+# intent: editable-path-bar
 # Thunar: use an editable path bar instead of breadcrumbs.
 if command -v thunar >/dev/null 2>&1; then
     xset_prop thunar /last-location-bar string ThunarLocationEntry
@@ -118,6 +130,7 @@ fi
 
 # --- Appearance ------------------------------------------------------------
 
+# intent: dark-theme
 # Prefer a dark GTK + window manager theme, whichever of these common dark
 # themes is actually installed (Settings > Appearance / Window Manager).
 pick_dark_theme() {

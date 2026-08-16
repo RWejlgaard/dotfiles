@@ -91,11 +91,13 @@ config/
       os                           # "Linux" — hidden from `make picky` elsewhere
       apply.sh
     # further sets live alongside these, following the same layout
+  desktop-common.sh         # What gnome/kde/xfce all agree to apply (see below)
 install-scripts/            # Numbered setup scripts run by the Makefile
   lib/sets.sh                # Shared helpers for discovering/enabling sets
   pick-sets.sh               # the dialog checklist; takes set names to skip it
 scripts/                    # Misc helper scripts (e.g. Gentoo kernel upgrade)
 tests/                      # Dockerfiles used by CI to test installs per distro
+  check-desktop-intents.sh   # Fails CI if a desktop set falls behind the others
 ```
 
 ## Config Sets & `make picky`
@@ -178,6 +180,45 @@ The saved selection is remembered by future `make refresh` / `make
 full-install` runs too, so you only need to pick once per machine. If you've
 never picked, everything defaults to just `basic`, matching this repo's
 historical behavior.
+
+### Desktop intents
+
+`gnome`, `kde` and `xfce` apply the same handful of decisions — key repeat
+rate, Caps Lock as Escape, no screen lock, no idle display blanking, no
+automount, an editable path bar, a dark theme — through three completely
+unrelated backends (`gsettings`, `kwriteconfig`, `xfconf-query`). There's no
+code worth sharing between them, so what gets shared instead is the decision.
+
+`config/desktop-common.sh` holds both halves of that:
+
+- the **values** all three should end up applying (`KEY_REPEAT_RATE`,
+  `KEY_REPEAT_DELAY_MS`), so changing the repeat rate is one edit rather than
+  three in three different unit systems — GNOME wants the gap between
+  repeats in milliseconds, the other two want a rate
+- the **list** of settings all three are expected to cover, as
+  `DESKTOP_INTENTS`
+
+Each `apply.sh` marks where it handles an intent with a `# intent: <id>`
+comment above the relevant section, and `tests/check-desktop-intents.sh`
+cross-references the two:
+
+```
+$ bash tests/check-desktop-intents.sh
+  intent              gnome    kde      xfce
+  keyboard-repeat     yes      yes      yes
+  caps-as-escape      yes      yes      yes
+  ...
+```
+
+It runs in CI and fails if a desktop is missing an intent, or marks one that
+isn't declared (which catches typos in the markers). So adding a setting to
+one desktop and forgetting the other two now breaks the build instead of
+going unnoticed. Settings that genuinely only exist on one desktop — Dolphin's
+menu bar, XFCE's panel layout — aren't intents and need no marker.
+
+The `macos` set is deliberately outside this: it isn't a desktop environment
+in the same sense, most of its settings have no Linux equivalent, and the few
+that overlap use units that don't convert cleanly.
 
 ### Adding a new set
 
@@ -402,6 +443,8 @@ When you submit a pull request, the following automated checks run:
 - **Native Testing**: macOS has no equivalent official container image, so it runs the full install directly on a hosted `macos-latest` runner instead
 
 - **Build Verification**: The GitHub Action (`pr-test.yml`) verifies that the dotfiles can be successfully built on each supported platform, and that the install actually landed (symlinks in place, fish functions loaded) — not just that the install command exited 0
+
+- **Lint & Consistency**: `shellcheck` over every shell script in the repo, a `fish --no-execute` parse of every fish script, and `tests/check-desktop-intents.sh` to catch the `gnome`/`kde`/`xfce` sets drifting apart (see [Desktop intents](#desktop-intents))
 
 ### Workflow Details
 
