@@ -14,7 +14,12 @@ jobs:
 
       - name: ShellCheck
         run: |
-          shellcheck -x install-scripts/*.sh install-scripts/lib/*.sh config/sets/*/apply.sh config/sets/basic/tmux/scripts/*.sh scripts/*
+          shellcheck -x install-scripts/*.sh install-scripts/lib/*.sh config/desktop-common.sh config/sets/*/apply.sh config/sets/basic/tmux/scripts/*.sh scripts/* tests/*.sh
+
+      # The gnome/kde/xfce sets apply the same decisions through three
+      # unrelated backends, so nothing else would notice one falling behind.
+      - name: Desktop intent coverage
+        run: bash tests/check-desktop-intents.sh
 
       - name: Fish syntax check
         run: |

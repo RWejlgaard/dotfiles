@@ -4,6 +4,14 @@ set -euo pipefail
 # GNOME settings that diverge from stock defaults on this machine, mirroring
 # config/sets/kde/apply.sh's choices for the GNOME desktop.
 # Each section below is independent and safe to re-run.
+#
+# The "# intent:" markers below tie each section to an entry in
+# config/desktop-common.sh, which is the one place the kde/gnome/xfce sets
+# agree on what they're all supposed to cover.
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+# shellcheck source=config/desktop-common.sh
+source "$REPO/config/desktop-common.sh"
 
 if ! command -v gsettings >/dev/null 2>&1; then
     echo "Warning: gsettings not found (not a GNOME system?); skipping GNOME settings." >&2
@@ -21,20 +29,23 @@ gset() {
     fi
 }
 
-# Keyboard repeat rate: 50 repeats/sec (20ms interval) with a 250ms initial
-# delay (Settings > Keyboard).
-gset org.gnome.desktop.peripherals.keyboard delay 250
-gset org.gnome.desktop.peripherals.keyboard repeat-interval 20
+# intent: keyboard-repeat
+# GNOME takes the gap *between* repeats in milliseconds rather than a rate,
+# so the shared rate is inverted here (Settings > Keyboard).
+gset org.gnome.desktop.peripherals.keyboard delay "$KEY_REPEAT_DELAY_MS"
+gset org.gnome.desktop.peripherals.keyboard repeat-interval "$(( 1000 / KEY_REPEAT_RATE ))"
 
-# Remap Caps Lock to Escape (gnome-tweaks > Keyboard & Mouse > Additional
-# Layout Options > Caps Lock Behavior).
+# intent: caps-as-escape
+# gnome-tweaks > Keyboard & Mouse > Additional Layout Options > Caps Lock
+# Behavior.
 gset org.gnome.desktop.input-sources xkb-options "['caps:escape']"
 
-# Disable screen locking entirely (Settings > Privacy & Security > Screen
-# Lock).
+# intent: no-screen-lock
+# Settings > Privacy & Security > Screen Lock.
 gset org.gnome.desktop.screensaver lock-enabled false
 gset org.gnome.desktop.screensaver idle-activation-enabled false
 
+# intent: no-idle-display
 # Never dim or blank the display when idle, on AC or battery (Settings >
 # Power).
 gset org.gnome.desktop.session idle-delay 0
@@ -42,15 +53,17 @@ gset org.gnome.settings-daemon.plugins.power idle-dim false
 gset org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
 gset org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
 
-# Disable automounting of removable devices (Settings > Removable Media).
+# intent: no-automount
+# Settings > Removable Media.
 gset org.gnome.desktop.media-handling automount false
 gset org.gnome.desktop.media-handling automount-open false
 
-# GTK file open/save dialogs: use an editable path bar instead of
-# breadcrumbs, matching Dolphin's setting.
+# intent: editable-path-bar
+# GTK file open/save dialogs: an editable path bar instead of breadcrumbs,
+# matching Dolphin's setting.
 gset org.gtk.Settings.FileChooser location-mode filename-entry
 gset org.gtk.gtk4.Settings.FileChooser location-mode filename-entry
 
-# Prefer a dark color scheme, GNOME's equivalent of Breeze Dark (Settings >
-# Appearance).
+# intent: dark-theme
+# GNOME's equivalent of Breeze Dark (Settings > Appearance).
 gset org.gnome.desktop.interface color-scheme prefer-dark
