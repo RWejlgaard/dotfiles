@@ -108,26 +108,15 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   conflict markers), a global gitignore, and a per-machine identity file
   (`~/.config/git/identity`, copied once so different machines can carry
   different `user.name`/`user.email`). It also installs **Delta** and wires
-  it in as the diff/log pager — written to a separate, untracked
-  `~/.config/git/local` file rather than `git config --global`, since with
-  no `~/.gitconfig` yet that resolves to the tracked `~/.config/git/config`
-  symlink
-- **`gentoo`** — installs `scripts/gentoo-kernel-upgrade` into `/usr/bin`: a
-  guided, confirm-every-step walkthrough of a `gentoo-kernel-bin` upgrade
-  (emerge, `eselect kernel`, back up the EFI boot files, regenerate the
-  initramfs, copy the new image across), plus a cleanup pass over superseded
-  kernels in `/boot`. It works out on its own whether this system's kernel
-  images are named `vmlinuz-<version>` or `kernel-<version>`; set
-  `KERNEL_PREFIX` to override that
-- **`gnome`** — the GNOME settings that differ from stock, applied via
-  `gsettings`: keyboard repeat rate 50/s with a 250ms delay, Caps Lock as
-  Escape, screen locking and idle display dim/off disabled, device
-  automounting disabled, an editable path bar in GTK file dialogs, and a
-  dark color scheme
-- **`kde`** — the KDE Plasma equivalents, applied via `kwriteconfig5`/`6`:
-  the same keyboard repeat rate and Caps Lock as Escape, screen locking and
-  idle display dim/off disabled, the device automounter disabled, Dolphin's
-  menu bar hidden with an editable path bar, and the Breeze Dark theme
+  it in as the diff/log pager, with line numbers on and higher-contrast
+  colors than its low-contrast-blue defaults — written to a separate,
+  untracked `~/.config/git/local` file rather than `git config --global`,
+  since with no `~/.gitconfig` yet that resolves to the tracked
+  `~/.config/git/config` symlink. lazygit (installed unconditionally by
+  `basic`) gets pointed at Delta too, via a `~/.config/lazygit/config.yml`
+  deployed the same copy-once way as the identity file
+- **`kde`** — sets the KDE Plasma keyboard repeat rate to 50/s with a 250ms
+  delay (via `kwriteconfig5`/`6` on `kcminputrc`)
 - **`macos`** — the macOS system settings that differ from stock, applied via
   `defaults write`: fastest keyboard repeat rate with the shortest delay, all
   automatic text substitution off, text replacements, the input-source and
