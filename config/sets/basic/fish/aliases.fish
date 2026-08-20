@@ -11,8 +11,8 @@ else if [ -f /etc/debian_version ]
     alias get="sudo apt install"
     alias search="apt search"
 else if [ -f /etc/alpine-release ]
-    alias get="apk add"
-    alias search="apk search"
+    alias get="sudo apk add"
+    alias search="sudo apk search"
 else if test (uname) = "FreeBSD"
     alias get="sudo pkg install -y"
     alias search="pkg search"

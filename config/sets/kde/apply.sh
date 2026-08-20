@@ -37,8 +37,11 @@ if [ -n "${DISPLAY:-}" ] && command -v xset >/dev/null 2>&1; then
 fi
 
 # intent: caps-as-escape
-# System Settings > Keyboard > Advanced > Caps Lock behavior.
+# System Settings > Keyboard > Advanced > Caps Lock behavior. Options is
+# ignored unless the "Configure keyboard options" checkbox (ResetOldOptions)
+# is also enabled.
 "$kwriteconfig" --file kxkbrc --group Layout --key Options "caps:escape"
+"$kwriteconfig" --file kxkbrc --group Layout --key ResetOldOptions true
 
 # intent: no-screen-lock
 # System Settings > Screen Locking.

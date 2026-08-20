@@ -36,3 +36,6 @@
 	last = log -1 HEAD
 	unstage = reset HEAD --
 	amend = commit --amend --no-edit
+[user]
+	email = pez@pez.sh
+	name = Rasmus Wejlgaard
