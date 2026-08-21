@@ -40,6 +40,10 @@ gset org.gnome.desktop.peripherals.keyboard repeat-interval "$(( 1000 / KEY_REPE
 # Behavior.
 gset org.gnome.desktop.input-sources xkb-options "['caps:escape']"
 
+# intent: alt-cvr-as-ctrl-cvr
+# Evdev-level, via keyd; see install_alt_cvr_remap in desktop-common.sh.
+install_alt_cvr_remap
+
 # intent: no-screen-lock
 # Settings > Privacy & Security > Screen Lock.
 gset org.gnome.desktop.screensaver lock-enabled false

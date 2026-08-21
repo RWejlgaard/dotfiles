@@ -1,5 +1,5 @@
-XFCE: keyboard repeat rate 50/s + 250ms delay, Caps Lock as Escape, screen
-locking and idle display dim/off disabled, device automounting disabled,
-editable path bar in Thunar and GTK file dialogs, dark theme, second panel
-removed and the primary panel moved to the bottom, plus Kitty installed and
-set as the default terminal
+XFCE: keyboard repeat rate 50/s + 250ms delay, Caps Lock as Escape, Alt+C/
+Alt+V/Alt+R as Ctrl+C/Ctrl+V/Ctrl+R, screen locking and idle display dim/off
+disabled, device automounting disabled, editable path bar in Thunar and GTK
+file dialogs, dark theme, second panel removed and the primary panel moved
+to the bottom, plus Kitty installed and set as the default terminal

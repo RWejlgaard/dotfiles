@@ -64,6 +64,10 @@ X-GNOME-Autostart-enabled=true
 EOF
 fi
 
+# intent: alt-cvr-as-ctrl-cvr
+# Evdev-level, via keyd; see install_alt_cvr_remap in desktop-common.sh.
+install_alt_cvr_remap
+
 # --- Screen locking & power --------------------------------------------
 
 # intent: no-screen-lock

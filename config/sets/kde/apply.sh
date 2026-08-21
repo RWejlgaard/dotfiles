@@ -43,6 +43,10 @@ fi
 "$kwriteconfig" --file kxkbrc --group Layout --key Options "caps:escape"
 "$kwriteconfig" --file kxkbrc --group Layout --key ResetOldOptions true
 
+# intent: alt-cvr-as-ctrl-cvr
+# Evdev-level, via keyd; see install_alt_cvr_remap in desktop-common.sh.
+install_alt_cvr_remap
+
 # intent: no-screen-lock
 # System Settings > Screen Locking.
 "$kwriteconfig" --file kscreenlockerrc --group Daemon --key Autolock false
