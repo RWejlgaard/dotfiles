@@ -1,3 +1,4 @@
-GNOME: keyboard repeat rate 50/s + 250ms delay, Caps Lock as Escape, screen
-locking and idle display dim/off disabled, device automounting disabled,
-editable path bar in file dialogs, dark color scheme
+GNOME: keyboard repeat rate 50/s + 250ms delay, Caps Lock as Escape, Alt+C/
+Alt+V/Alt+R as Ctrl+C/Ctrl+V/Ctrl+R, screen locking and idle display dim/off
+disabled, device automounting disabled, editable path bar in file dialogs,
+dark color scheme
