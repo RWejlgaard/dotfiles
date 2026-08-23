@@ -36,17 +36,6 @@ if [ -n "${DISPLAY:-}" ] && command -v xset >/dev/null 2>&1; then
     xset r rate "$KEY_REPEAT_DELAY_MS" "$KEY_REPEAT_RATE" || true
 fi
 
-# intent: caps-as-escape
-# System Settings > Keyboard > Advanced > Caps Lock behavior. Options is
-# ignored unless the "Configure keyboard options" checkbox (ResetOldOptions)
-# is also enabled.
-"$kwriteconfig" --file kxkbrc --group Layout --key Options "caps:escape"
-"$kwriteconfig" --file kxkbrc --group Layout --key ResetOldOptions true
-
-# intent: alt-cvr-as-ctrl-cvr
-# Evdev-level, via keyd; see install_alt_cvr_remap in desktop-common.sh.
-install_alt_cvr_remap
-
 # intent: no-screen-lock
 # System Settings > Screen Locking.
 "$kwriteconfig" --file kscreenlockerrc --group Daemon --key Autolock false
