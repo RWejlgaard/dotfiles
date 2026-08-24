@@ -43,31 +43,6 @@ if [ -n "${DISPLAY:-}" ] && command -v xset >/dev/null 2>&1; then
     xset r rate "$KEY_REPEAT_DELAY_MS" "$KEY_REPEAT_RATE" || true
 fi
 
-# intent: caps-as-escape
-# Unlike the layout/group/compose-key options,
-# xfsettingsd has no xfconf-backed setting for this XKB option group, so it
-# can't be stored declaratively the way the kde/gnome sets do it — it's
-# applied directly via setxkbmap instead, both now and on every future
-# login via an autostart entry.
-if [ -n "${DISPLAY:-}" ] && command -v setxkbmap >/dev/null 2>&1; then
-    setxkbmap -option caps:escape || true
-fi
-if command -v setxkbmap >/dev/null 2>&1; then
-    mkdir -p ~/.config/autostart
-    cat > ~/.config/autostart/caps-escape.desktop <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=Caps Lock as Escape
-Exec=sh -c "sleep 2 && setxkbmap -option caps:escape"
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-EOF
-fi
-
-# intent: alt-cvr-as-ctrl-cvr
-# Evdev-level, via keyd; see install_alt_cvr_remap in desktop-common.sh.
-install_alt_cvr_remap
-
 # --- Screen locking & power --------------------------------------------
 
 # intent: no-screen-lock

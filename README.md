@@ -80,6 +80,11 @@ config/
       manifest
       os                           # "Linux" — hidden from `make picky` elsewhere
       apply.sh
+    keyboard-remap/                # Alt+C/V/R as Ctrl+C/V/R, system-wide (`keyd`)
+      description
+      manifest
+      os                           # "Linux" — hidden from `make picky` elsewhere
+      apply.sh
     macos/                         # macOS system settings (`defaults write`)
       description
       manifest
@@ -119,6 +124,11 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   deployed the same copy-once way as the identity file
 - **`kde`** — sets the KDE Plasma keyboard repeat rate to 50/s with a 250ms
   delay (via `kwriteconfig5`/`6` on `kcminputrc`)
+- **`keyboard-remap`** — installs and configures **keyd** so Caps Lock acts
+  as Escape and Alt+C/Alt+V/Alt+R send Ctrl+C/Ctrl+V/Ctrl+R, system-wide.
+  This is evdev-level, below any desktop environment, so it's its own set
+  rather than something `gnome`/`kde`/`xfce` each apply — it works the same
+  regardless of desktop (Wayland or X11), or with none at all
 - **`macos`** — the macOS system settings that differ from stock, applied via
   `defaults write`: fastest keyboard repeat rate with the shortest delay, all
   automatic text substitution off, text replacements, the input-source and
@@ -131,11 +141,11 @@ Config files are grouped into **sets** under `config/sets/<name>/`:
   shortcuts (Cmd+Shift+arrows for window halves, Cmd+Shift+V for clipboard
   history)
 - **`xfce`** — the XFCE settings that differ from stock, applied via
-  `xfconf-query`: the same keyboard repeat rate and Caps Lock as Escape as
-  `kde`/`gnome`, screen locking and idle display dim/off disabled, device
-  automounting disabled, an editable path bar in Thunar and GTK file
-  dialogs, a dark theme (whichever of a few common ones is actually
-  installed), and the default panel layout collapsed down to a single
+  `xfconf-query`: the same keyboard repeat rate as `kde`/`gnome`, screen
+  locking and idle display dim/off disabled, device automounting disabled,
+  an editable path bar in Thunar and GTK file dialogs, a dark theme
+  (whichever of a few common ones is actually installed), and the default
+  panel layout collapsed down to a single
   panel docked to the bottom of the screen. It also installs and
   configures **Kitty** as the default terminal
 
@@ -173,8 +183,8 @@ historical behavior.
 ### Desktop intents
 
 `gnome`, `kde` and `xfce` apply the same handful of decisions — key repeat
-rate, Caps Lock as Escape, no screen lock, no idle display blanking, no
-automount, an editable path bar, a dark theme — through three completely
+rate, no screen lock, no idle display blanking, no automount, an editable
+path bar, a dark theme — through three completely
 unrelated backends (`gsettings`, `kwriteconfig`, `xfconf-query`). There's no
 code worth sharing between them, so what gets shared instead is the decision.
 
@@ -195,7 +205,7 @@ cross-references the two:
 $ bash tests/check-desktop-intents.sh
   intent              gnome    kde      xfce
   keyboard-repeat     yes      yes      yes
-  caps-as-escape      yes      yes      yes
+  no-screen-lock      yes      yes      yes
   ...
 ```
 

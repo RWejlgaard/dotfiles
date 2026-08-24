@@ -35,15 +35,6 @@ gset() {
 gset org.gnome.desktop.peripherals.keyboard delay "$KEY_REPEAT_DELAY_MS"
 gset org.gnome.desktop.peripherals.keyboard repeat-interval "$(( 1000 / KEY_REPEAT_RATE ))"
 
-# intent: caps-as-escape
-# gnome-tweaks > Keyboard & Mouse > Additional Layout Options > Caps Lock
-# Behavior.
-gset org.gnome.desktop.input-sources xkb-options "['caps:escape']"
-
-# intent: alt-cvr-as-ctrl-cvr
-# Evdev-level, via keyd; see install_alt_cvr_remap in desktop-common.sh.
-install_alt_cvr_remap
-
 # intent: no-screen-lock
 # Settings > Privacy & Security > Screen Lock.
 gset org.gnome.desktop.screensaver lock-enabled false
