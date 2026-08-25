@@ -68,16 +68,36 @@ gadget_battery() {
         fi
         return
     fi
-    output=$(acpi -b 2>/dev/null | grep -v -i "unavailable" | head -1)
-    [ -z "$output" ] && return
-    percent=$(echo "$output" | grep -oP '\d+(?=%)')
-    time=$(echo "$output" | grep -oP '\d+:\d+:\d+')
+    local bat dir status rate_attr charge_attr charge_now rate_now charge_full remain h m fmt
+    bat=$(ls /sys/class/power_supply/ 2>/dev/null | grep -m1 '^BAT')
+    [ -z "$bat" ] && return
+    dir="/sys/class/power_supply/$bat"
+    [ -r "$dir/capacity" ] || return
+    percent=$(<"$dir/capacity")
+    status=$(<"$dir/status")
     [ "$percent" -le 20 ] && colour=colour1 || { [ "$percent" -le 50 ] && colour=colour3 || colour=colour2; }
-    if [ -n "$time" ]; then
-        h=$(echo "$time" | cut -d: -f1 | sed 's/^0//')
-        m=$(echo "$time" | cut -d: -f2 | sed 's/^0//')
-        [ -z "$h" ] && h=0
-        [ -z "$m" ] && m=0
+
+    if [ -r "$dir/charge_now" ] && [ -r "$dir/current_now" ]; then
+        charge_attr=charge_now; rate_attr=current_now
+    elif [ -r "$dir/energy_now" ] && [ -r "$dir/power_now" ]; then
+        charge_attr=energy_now; rate_attr=power_now
+    fi
+    if [ -n "$rate_attr" ]; then
+        charge_now=$(<"$dir/$charge_attr")
+        rate_now=$(<"$dir/$rate_attr")
+        if [ "$rate_now" -gt 0 ] 2>/dev/null; then
+            if [ "$status" = "Discharging" ]; then
+                remain=$(( charge_now * 60 / rate_now ))
+            elif [ "$status" = "Charging" ] && [ -r "$dir/${charge_attr%_now}_full" ]; then
+                charge_full=$(<"$dir/${charge_attr%_now}_full")
+                remain=$(( (charge_full - charge_now) * 60 / rate_now ))
+            fi
+        fi
+    fi
+
+    if [ -n "$remain" ] && [ "$remain" -gt 0 ] 2>/dev/null; then
+        h=$(( remain / 60 ))
+        m=$(( remain % 60 ))
         [ "$h" -gt 0 ] && fmt="${h}h ${m}m" || fmt="${m}m"
         echo "BAT: #[fg=$colour]${percent}%#[fg=colour7] - ${fmt}"
     else
